@@ -1,0 +1,13 @@
+{
+	"Name": "JEC Service",
+	"DisplayName": "JEC Service",
+	"Description": "Run the JEC Service",
+	"JECPath" : "C:\\jsm\\jsm-jec\\JiraEdgeConnector64.exe",
+	"Args" : ["-jec-metrics", "7070"],
+	"Env": [
+		"JEC_CONF_LOCAL_FILEPATH=C:\\jsm\\jsm-jec\\conf\\jec-config.json",
+		"JEC_CONF_SOURCE_TYPE=local"
+	],
+	"Stderr": "C:\\jsm\\jsm-jec\\output\\jecErr.log",
+	"Stdout": "C:\\jsm\\jsm-jec\\output\\jecOut.log"
+}

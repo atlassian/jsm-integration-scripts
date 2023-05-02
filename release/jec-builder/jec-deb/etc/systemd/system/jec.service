@@ -1,0 +1,14 @@
+[Unit]
+Description=Jira Edge Connector (JEC)
+
+[Service]
+Group=jec
+User=jec
+Type=simple
+ExecStart=/usr/local/bin/JiraEdgeConnector
+
+Environment="JEC_CONF_SOURCE_TYPE=local"
+Environment="JEC_CONF_LOCAL_FILEPATH=/home/jsm/jec/conf/jec-config.json"
+
+[Install]
+WantedBy=multi-user.target

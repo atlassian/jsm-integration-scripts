@@ -1,0 +1,87 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Jira Service Management - AmazonSecurityHub",
+  "Parameters": {
+    "IntegrationApiKey": {
+      "Type": "String",
+      "Description": "Jira Service Management SecurityHub Integration Api Key"
+    },
+    "RoleName": {
+      "Type": "String",
+      "Description": "IAM role name, follow this naming convention `jsmSecurityHubRole*`"
+    }
+  },
+  "Resources": {
+    "jsmSecurityHubRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  "arn:aws:iam::089311581210:role/jsm-securityhub-app",
+                  "arn:aws:iam::401089113854:role/jsm-securityhub-app",
+                  "arn:aws:iam::838921230308:role/jsm-securityhub-app",
+                  "arn:aws:iam::028860521379:role/jsm-securityhub-app"
+                ]
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "sts:ExternalId": [
+                    {
+                      "Ref": "IntegrationApiKey"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "Description": "IAM role to allow Jira Service Management to access security hub",
+        "Policies": [
+          {
+            "PolicyName": "jsmSecurityHubPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "VisualEditor0",
+                  "Effect": "Allow",
+                  "Action": [
+                    "securityhub:GetFindings",
+                    "securityhub:BatchUpdateFindings"
+                  ],
+                  "Resource": [
+                    "arn:aws:securityhub:*:*:*"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "RoleName": {
+          "Ref": "RoleName"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "JsmSecurityHubRoleName": {
+      "Value": {
+        "Ref": "jsmSecurityHubRole"
+      }
+    },
+    "JsmSecurityHubRoleARN": {
+      "Value": {
+        "Fn::GetAtt": [
+          "jsmSecurityHubRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}

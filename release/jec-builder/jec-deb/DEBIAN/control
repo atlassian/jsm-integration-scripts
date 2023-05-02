@@ -1,0 +1,8 @@
+Name: Jira Edge Connector (JEC)
+Description: Integration server for Connecting On-Premise Monitoring and ITSM Tools
+Website: https://www.atlassian.com
+Maintainer: Atlassian
+Package: %INTEGRATION%
+Section: %INTEGRATION%
+Version: %VERSION%
+Architecture: amd64

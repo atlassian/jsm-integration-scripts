@@ -1,0 +1,62 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Template that creates a CloudWatch Event for Jira Service Management SecurityHub Integration",
+
+  "Parameters" : {
+    "EventPatternParameter" : {
+      "Type": "String",
+      "Description" : "Provide a JSON Object that represents the Event Pattern"
+    },
+    "SNSSubEndpoint" : {
+      "Type" : "String",
+      "Description" : "Enter the SNS Subscription Endpoint"
+    }
+  },
+
+  "Resources" : {
+    "securityHubCWERule": {
+      "DependsOn": "OGSHSNSTopic",
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "SecurityHub Event Rule",
+        "EventPattern": {"Ref": "EventPatternParameter"},
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": { "Ref": "OGSHSNSTopic" },
+            "Id": "SecurityHubTopic"
+          }
+        ]
+      }
+    },
+
+    "OGSHSNSTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "Subscription": [
+          {"Endpoint": {"Ref": "SNSSubEndpoint"}, "Protocol" : "https"}
+        ],
+        "TopicName": "JSMSHFindingTopic",
+        "DisplayName": "JSMSHFindingTopic"
+      }
+    },
+
+    "EventTopicPolicy": {
+      "DependsOn": "OGSHSNSTopic",
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "events.amazonaws.com" },
+              "Action": "sns:Publish",
+              "Resource": "*"
+            }
+          ]
+        },
+        "Topics": [ { "Ref": "OGSHSNSTopic" } ]
+      }
+    }
+  }
+}

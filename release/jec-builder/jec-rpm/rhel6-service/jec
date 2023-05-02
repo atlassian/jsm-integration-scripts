@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# description: Jira Edge Connector (JEC)
+#
+# Below is the source function library
+#
+. /etc/init.d/functions
+
+exec="/usr/local/bin/JiraEdgeConnector"
+prog="JEC"
+config="/home/jsm/jec/conf/jec-config.json"
+
+export JEC_CONF_SOURCE_TYPE="local"
+export JEC_CONF_LOCAL_FILEPATH="/home/jsm/jec/conf/jec-config.json"
+
+start() {
+        echo -n "Starting Jira Edge Connector (JEC)"
+        $exec
+}
+
+stop() {
+        echo -n "Stopping Jira Edge Connector (JEC)"
+        kill -15 $(pgrep -f JiraEdgeConnector)
+}
+
+
+case "$1" in
+    start)
+        start
+    ;;
+    stop)
+        stop
+    ;;
+    restart)
+    echo -n "Restarting Jira Edge Connector (JEC)"
+        stop
+        start
+    ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+    ;;
+esac

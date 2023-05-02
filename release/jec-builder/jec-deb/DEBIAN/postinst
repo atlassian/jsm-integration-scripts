@@ -1,0 +1,8 @@
+#!/bin/bash
+chown -R jec:jec /home/jsm
+chown -R jec:jec /var/log/jec
+
+chmod +x /etc/systemd/system/jec.service
+chmod +x /usr/local/bin/JiraEdgeConnector
+systemctl daemon-reload
+systemctl enable jec

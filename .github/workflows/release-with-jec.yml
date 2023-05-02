@@ -1,0 +1,413 @@
+name: Release Integrations with JEC scripts
+on:
+  workflow_dispatch:
+    inputs:
+      integration:
+        description: 'Integration Type'
+        required: true
+        type: choice
+        options:
+          - icinga
+          - icinga2
+          - jec
+          - nagios
+          - nagios-xi
+          - op5
+          - prtg
+          - solarwinds-msp-n-central
+          - solarwinds-npm
+          - solarwinds-web-help-desk
+          - zenoss
+      jec-version:
+        description: 'Version of JEC'
+        required: true
+jobs:
+  setup:
+    name: Setup For ${{ github.event.inputs.integration }} Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{  steps.create_release.outputs.upload_url }}
+      integration_name: ${{  steps.gather_params.outputs.INTEGRATION_NAME }}
+      integration_version: ${{  steps.gather_params.outputs.INTEGRATION_VERSION }}
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Retrieve Integration Version
+      id: gather_params
+      run: |
+        echo ::set-output name=INTEGRATION_VERSION::$(jq -r --arg v "${{ github.event.inputs.integration }}" '.[$v]' release/jec-builder/version.json)
+        echo ::set-output name=INTEGRATION_NAME::$(echo "${{ github.event.inputs.integration }}" | awk '{print tolower($0)}')
+    - name: Create ${{ github.event.inputs.integration }} Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        INTEGRATION_VERSION: ${{ steps.gather_params.outputs.INTEGRATION_VERSION }}
+        INTEGRATION_NAME: ${{ github.event.inputs.integration }}
+      with:
+        tag_name: ${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}_jec-${{ github.event.inputs.jec-version }}
+        release_name: ${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}_jec-${{ github.event.inputs.jec-version }}
+        draft: true
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    needs: [setup]
+    env:
+      INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
+      INTEGRATION_VERSION: ${{ needs.setup.outputs.integration_version }}
+      INTEGRATION_FOLDER: jsm-${{ needs.setup.outputs.integration_name }}-${{ needs.setup.outputs.integration_version }}-linux-amd64
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.7
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Create Output Directory
+      run: mkdir -p .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
+    - name: Download Asset
+      uses: i3h/download-release-asset@v1.2.0
+      with:
+        owner: atlassian-labs
+        repo: jec
+        tag: ${{ github.event.inputs.jec-version }}
+        file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
+    - name: Extracting Linux Package
+      run: unzip -qq jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
+    - name: Copy Integration Files
+      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
+    - name: Remove http script (todo remove when http version is released)
+      run: rm -f .release/jec-linux/${{ env.INTEGRATION_FOLDER }}/scripts/http.py
+    - name: Check Incoming part exists
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: ".release/jec-linux/${{ env.INTEGRATION_FOLDER }}/scripts/send2jsm.go"
+    - name: "Release Incoming Part"
+      working-directory: .release
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: |
+        INTEGRATION_PATH=jec-linux/${{ env.INTEGRATION_FOLDER }}/scripts
+        echo ${INTEGRATION_PATH}
+        go get -u github.com/alexcesaro/log && \
+        cd ${INTEGRATION_PATH} && \
+        GOOS=linux GOARCH=amd64 go build -o send2jsm send2jsm.go
+    - name: Compressing Linux Package
+      run: |
+          cd .release/jec-linux/
+          zip -r jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}-linux-amd64.zip ./${{ env.INTEGRATION_FOLDER }}
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Linux Artifact
+        path: .release/jec-linux/*.zip
+    - name: Upload
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.setup.outputs.upload_url }}
+        asset_path: .release/jec-linux/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}-linux-amd64.zip
+        asset_name: jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}-linux-amd64.zip
+        asset_content_type: application/zip
+  rpm:
+    name: RPM
+    runs-on: ubuntu-latest
+    needs: [setup]
+    env:
+      INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
+      INTEGRATION_VERSION: ${{ needs.setup.outputs.integration_version }}
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.7
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Create Output Directory
+      run: mkdir -p .release/jec-rpm
+    - name: Download Asset
+      uses: i3h/download-release-asset@v1.2.0
+      with:
+        owner: atlassian-labs
+        repo: jec
+        tag: ${{ github.event.inputs.jec-version }}
+        file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
+    - name: Extracting Linux Package
+      run: unzip -qq jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-rpm
+    - name: Copy SPEC Files
+      run: cp -R release/jec-builder/jec-rpm/. .release/jec-rpm
+    - name: Copy Integration Files
+      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-rpm/jec-scripts
+    - name: Check Incoming part exists
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: ".release/jec-rpm/jec-scripts/scripts/send2jsm.go"
+    - name: "Release Incoming Part"
+      working-directory: .release
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: |
+        INTEGRATION_PATH=jec-rpm/jec-scripts/scripts
+        echo ${INTEGRATION_PATH}
+        go get -u github.com/alexcesaro/log && \
+        cd ${INTEGRATION_PATH} && \
+        GOOS=linux GOARCH=amd64 go build -o send2jsm send2jsm.go
+    - name: Create RPM Package
+      working-directory: .release/jec-rpm
+      run: |
+        sed -i "s|<path_of_script>|$RPM_BUILD_ROOT/home/jsm/jec/scripts/jec_action_executor.py|" jec-scripts/conf/jec-config.json
+        sed -i "s|<path_of_output_file_of_script>|$RPM_BUILD_ROOT/home/jsm/jec/output/output.txt|" jec-scripts/conf/jec-config.json
+        sed -i "s/<local | git>/local/g" jec-scripts/conf/jec-config.json
+
+        sed -i "s/%VERSION%/${INTEGRATION_VERSION}/g" SPECS/jec.spec
+        sed -i "s/%VERSION%/${INTEGRATION_VERSION}/g" SPECS/jec-rhel6.spec
+
+        sed -i "s/%INTEGRATION%/jsm-${INTEGRATION_NAME}/g" SPECS/jec.spec
+        sed -i "s/%INTEGRATION%/jsm-${INTEGRATION_NAME}/g" SPECS/jec-rhel6.spec
+
+        rpmbuild --target=x86_64 -ba SPECS/jec.spec
+        rpmbuild --target=x86_64 -ba SPECS/jec-rhel6.spec
+    - name: Move RPM Package
+      run: mv ~/rpmbuild/RPMS/x86_64/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}-1.x86_64.rpm .release/jec-rpm/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.x86_64.rpm
+    - name: Move RHEL6 Package
+      run: mv ~/rpmbuild/RPMS/x86_64/jsm-${{ env.INTEGRATION_NAME }}-rhel6-${{ env.INTEGRATION_VERSION }}-1.x86_64.rpm .release/jec-rpm/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.rhel6.x86_64.rpm
+    - name: Upload RPM Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: RPM Artifact
+        path: .release/jec-rpm/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.x86_64.rpm
+    - name: Upload RHEL6 Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: RHEL6 Artifact
+        path: .release/jec-rpm/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.rhel6.x86_64.rpm
+    - name: Upload RPM
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.setup.outputs.upload_url }}
+        asset_path: .release/jec-rpm/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.x86_64.rpm
+        asset_name: jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.x86_64.rpm
+        asset_content_type: application/octet-stream
+    - name: Upload RHEL6
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.setup.outputs.upload_url }}
+        asset_path: .release/jec-rpm/jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.rhel6.x86_64.rpm
+        asset_name: jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}.rhel6.x86_64.rpm
+        asset_content_type: application/octet-stream
+  deb:
+    name: DEB
+    runs-on: ubuntu-latest
+    needs: [setup]
+    env:
+      INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
+      INTEGRATION_VERSION: ${{ needs.setup.outputs.integration_version }}
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.7
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Create Output Directory
+      run: mkdir -p .release/jec-deb/usr/local/bin
+    - name: Download Asset
+      uses: i3h/download-release-asset@v1.2.0
+      with:
+        owner: atlassian-labs
+        repo: jec
+        tag: ${{ github.event.inputs.jec-version }}
+        file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
+    - name: Extracting Linux Package
+      run: unzip -qq jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-deb/usr/local/bin
+    - name: Copy SPEC Files
+      run: cp -R release/jec-builder/jec-deb/. .release/jec-deb
+    - name: Create Output Directory
+      run: mkdir -p .release/jec-deb/home/jsm/jec
+    - name: Copy Integration Files
+      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-deb/home/jsm/jec
+    - name: Check Incoming part exists
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: ".release/jec-deb/home/jsm/jec/scripts/send2jsm.go"
+    - name: "Release Incoming Part"
+      working-directory: .release
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: |
+        INTEGRATION_PATH=jec-deb/home/jsm/jec/scripts
+        echo ${INTEGRATION_PATH}
+        go get -u github.com/alexcesaro/log && \
+        cd ${INTEGRATION_PATH} && \
+        GOOS=linux GOARCH=amd64 go build -o send2jsm send2jsm.go
+    - name: Create Deb Package
+      working-directory: .release/
+      run: |
+        sed -i "s|<path_of_script>|/home/jsm/jec/scripts/jec_action_executor.py|" jec-deb/home/jsm/jec/conf/jec-config.json
+        sed -i "s|<path_of_output_file_of_script>|/home/jsm/jec/output/output.txt|" jec-deb/home/jsm/jec/conf/jec-config.json
+        sed -i "s/<local | git>/local/g" jec-deb/home/jsm/jec/conf/jec-config.json
+
+        sed -i "s/%VERSION%/${INTEGRATION_VERSION}/g" jec-deb/DEBIAN/control
+        sed -i "s/%INTEGRATION%/jsm-${INTEGRATION_NAME}/g" jec-deb/DEBIAN/control
+
+        mkdir deb-package
+        dpkg-deb -b  jec-deb deb-package
+    - name: Move Deb Package
+      run: mv .release/deb-package/*.deb .release/jec-deb/jsm-${{ env.INTEGRATION_NAME }}_${{ env.INTEGRATION_VERSION }}_amd64.deb
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Debian Artifact
+        path: .release/jec-deb/jsm-${{ env.INTEGRATION_NAME }}_${{ env.INTEGRATION_VERSION }}_amd64.deb
+    - name: Upload
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.setup.outputs.upload_url }}
+        asset_path: .release/jec-deb/jsm-${{ env.INTEGRATION_NAME }}_${{ env.INTEGRATION_VERSION }}_amd64.deb
+        asset_name: jsm-${{ env.INTEGRATION_NAME }}_${{ env.INTEGRATION_VERSION }}_amd64.deb
+        asset_content_type: application/octet-stream
+  win32:
+    name: Windows 32
+    runs-on: ubuntu-latest
+    needs: [setup]
+    env:
+      INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
+      INTEGRATION_VERSION: ${{ needs.setup.outputs.integration_version }}
+      INTEGRATION_FOLDER: jsm-${{ needs.setup.outputs.integration_name }}-${{ needs.setup.outputs.integration_version }}-win-386
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.7
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Create Output Directory
+      run: mkdir -p .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
+    - name: Download Asset
+      uses: i3h/download-release-asset@v1.2.0
+      with:
+        owner: atlassian-labs
+        repo: jec
+        tag: ${{ github.event.inputs.jec-version }}
+        file: jec-win-386-${{ github.event.inputs.jec-version }}.zip
+    - name: Extracting Win32 Package
+      run: unzip -qq jec-win-386-${{ github.event.inputs.jec-version }}.zip -d .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
+    - name: Copy JEC Service Conf
+      run: cp -R release/jec-builder/jec-win32/jecService.json.example .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
+    - name: Copy Integration Files
+      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
+    - name: Remove http script (todo remove when http version is released)
+      run: rm -f .release/jec-win32/${{ env.INTEGRATION_FOLDER }}/scripts/http.py
+    - name: Check Incoming part exists
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: ".release/jec-win32/${{ env.INTEGRATION_FOLDER }}/scripts/send2jsm.go"
+    - name: "Release Incoming Part"
+      working-directory: .release
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: |
+        INTEGRATION_PATH=jec-win32/${{ env.INTEGRATION_FOLDER }}/scripts
+        echo ${INTEGRATION_PATH}
+        go get -u github.com/alexcesaro/log && \
+        cd ${INTEGRATION_PATH} && \
+        GOOS=windows GOARCH=386 go build -o send2jsm32.exe send2jsm.go
+    - name: Compressing Win32 Package
+      run: |
+          cd .release/jec-win32/
+          zip -r ${{ env.INTEGRATION_FOLDER }}.zip ./${{ env.INTEGRATION_FOLDER }}
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Win32 Artifact
+        path: .release/jec-win32/*.zip
+    - name: Upload
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.setup.outputs.upload_url }}
+        asset_path: .release/jec-win32/${{ env.INTEGRATION_FOLDER }}.zip
+        asset_name: ${{ env.INTEGRATION_FOLDER }}.zip
+        asset_content_type: application/zip
+  win64:
+    name: Windows 64
+    runs-on: ubuntu-latest
+    needs: [setup]
+    env:
+      INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
+      INTEGRATION_VERSION: ${{ needs.setup.outputs.integration_version }}
+      INTEGRATION_FOLDER: jsm-${{ needs.setup.outputs.integration_name }}-${{ needs.setup.outputs.integration_version }}-win-amd64
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.7
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Create Output Directory
+      run: mkdir -p .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
+    - name: Download Asset
+      uses: i3h/download-release-asset@v1.2.0
+      with:
+        owner: atlassian-labs
+        repo: jec
+        tag: ${{ github.event.inputs.jec-version }}
+        file: jec-win-amd64-${{ github.event.inputs.jec-version }}.zip
+    - name: Extracting Win64 Package
+      run: unzip -qq jec-win-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
+    - name: Copy JEC Service Conf
+      run: cp -R release/jec-builder/jec-win64/jecService.json.example .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
+    - name: Copy Integration Files
+      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
+    - name: Remove http script (todo remove when http version is released)
+      run: rm -f .release/jec-win64/${{ env.INTEGRATION_FOLDER }}/scripts/http.py
+    - name: Check Incoming part exists
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: ".release/jec-win64/${{ env.INTEGRATION_FOLDER }}/scripts/send2jsm.go"
+    - name: "Release Incoming Part"
+      working-directory: .release
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: |
+        INTEGRATION_PATH=jec-win64/${{ env.INTEGRATION_FOLDER }}/scripts
+        echo ${INTEGRATION_PATH}
+        go get -u github.com/alexcesaro/log && \
+        cd ${INTEGRATION_PATH} && \
+        GOOS=windows GOARCH=amd64 go build -o send2jsm32.exe send2jsm.go
+    - name: Compressing Win 64 Package
+      run: |
+          cd .release/jec-win64/
+          zip -r ${{ env.INTEGRATION_FOLDER }}.zip ./${{ env.INTEGRATION_FOLDER }}
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Win64 Artifact
+        path: .release/jec-win64/*.zip
+    - name: Upload
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.setup.outputs.upload_url }}
+        asset_path: .release/jec-win64/${{ env.INTEGRATION_FOLDER }}.zip
+        asset_name: ${{ env.INTEGRATION_FOLDER }}.zip
+        asset_content_type: application/zip

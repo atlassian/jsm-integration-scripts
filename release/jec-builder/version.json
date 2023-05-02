@@ -1,0 +1,14 @@
+{
+  "jecVersion": "0.1.0",
+  "icinga": "0.1.0",
+  "icinga2": "0.1.0",
+  "jec": "0.1.0",
+  "nagios": "0.1.0",
+  "nagios-xi": "0.1.0",
+  "op5": "0.1.0",
+  "prtg": "0.1.0",
+  "solarwinds-msp-n-central": "0.1.0",
+  "solarwinds-npm": "0.1.0",
+  "solarwinds-web-help-desk": "0.1.0",
+  "zenoss": "0.1.0"
+}

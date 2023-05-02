@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ ! -d "/var/log/jec" ]; then
+    mkdir /var/log/jec
+fi
+
+if [ ! -d "/home/jsm" ]; then
+    mkdir /home/jsm
+fi
+
+if [  -z $(getent passwd jec) ]; then
+    groupadd jec -r
+    useradd -g jec jec -r -d /home/jsm
+fi
