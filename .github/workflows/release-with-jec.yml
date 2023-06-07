@@ -70,7 +70,7 @@ jobs:
     - name: Download Asset
       uses: i3h/download-release-asset@v1.2.0
       with:
-        owner: atlassian-labs
+        owner: atlassian
         repo: jec
         tag: ${{ github.event.inputs.jec-version }}
         file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
@@ -133,7 +133,7 @@ jobs:
     - name: Download Asset
       uses: i3h/download-release-asset@v1.2.0
       with:
-        owner: atlassian-labs
+        owner: atlassian
         repo: jec
         tag: ${{ github.event.inputs.jec-version }}
         file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
@@ -225,7 +225,7 @@ jobs:
     - name: Download Asset
       uses: i3h/download-release-asset@v1.2.0
       with:
-        owner: atlassian-labs
+        owner: atlassian
         repo: jec
         tag: ${{ github.event.inputs.jec-version }}
         file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
@@ -301,7 +301,7 @@ jobs:
     - name: Download Asset
       uses: i3h/download-release-asset@v1.2.0
       with:
-        owner: atlassian-labs
+        owner: atlassian
         repo: jec
         tag: ${{ github.event.inputs.jec-version }}
         file: jec-win-386-${{ github.event.inputs.jec-version }}.zip
@@ -367,7 +367,7 @@ jobs:
     - name: Download Asset
       uses: i3h/download-release-asset@v1.2.0
       with:
-        owner: atlassian-labs
+        owner: atlassian
         repo: jec
         tag: ${{ github.event.inputs.jec-version }}
         file: jec-win-amd64-${{ github.event.inputs.jec-version }}.zip
