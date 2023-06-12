@@ -1,6 +1,6 @@
 {
   "apiKey": "<API_KEY>",
-  "baseUrl": "https://api.opsgenie.com",
+  "baseUrl": "https://api.atlassian.com",
   "logLevel": "DEBUG",
   "globalArgs": [
     "<list_of_args_you_want_to_pass_to_the_scripts>"
@@ -8,7 +8,7 @@
   "globalFlags": {
   },
   "actionMappings": {
-    "Create": {
+    "postActionToJEC": {
       "filepath": "<path_of_script>",
       "sourceType": "<local | git>",
       "env": [
