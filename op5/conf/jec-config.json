@@ -1,6 +1,6 @@
 {
   "apiKey": "<API_KEY>",
-  "baseUrl": "https://api.atlassian.com/jsm/ops/integration",
+  "baseUrl": "https://api.atlassian.com",
   "logLevel": "DEBUG",
   "globalArgs": [],
   "globalFlags": {
