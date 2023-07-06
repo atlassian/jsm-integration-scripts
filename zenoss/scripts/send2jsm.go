@@ -24,7 +24,7 @@ var API_KEY = ""
 var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": API_KEY,
 	"zenoss2jsm.logger": "warning",
-	"jsm.api.url": "https://api.atlassian.com/jsm/ops/integration",
+	"jsm.api.url": "https://api.atlassian.com",
 	"zenoss2jsm.http.proxy.enabled": "false",
 	"zenoss2jsm.http.proxy.port": "1111",
 	"zenoss2jsm.http.proxy.host": "localhost",
@@ -271,7 +271,7 @@ func logErrorAndExit(log string, err error) {
 }
 
 func postToJSM() {
-	apiUrl := configParameters["jsm.api.url"] + "/v1/json/zenoss"
+	apiUrl := configParameters["jsm.api.url"] + "/jsm/ops/integration/v1/json/zenoss"
 	target := "JSM"
 
 	if logger != nil {
