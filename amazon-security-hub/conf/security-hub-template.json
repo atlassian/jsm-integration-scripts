@@ -15,7 +15,7 @@
 
   "Resources" : {
     "securityHubCWERule": {
-      "DependsOn": "OGSHSNSTopic",
+      "DependsOn": "JSMSHSNSTopic",
       "Type": "AWS::Events::Rule",
       "Properties": {
         "Description": "SecurityHub Event Rule",
@@ -23,14 +23,14 @@
         "State": "ENABLED",
         "Targets": [
           {
-            "Arn": { "Ref": "OGSHSNSTopic" },
+            "Arn": { "Ref": "JSMSHSNSTopic" },
             "Id": "SecurityHubTopic"
           }
         ]
       }
     },
 
-    "OGSHSNSTopic": {
+    "JSMSHSNSTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
         "Subscription": [
@@ -42,7 +42,7 @@
     },
 
     "EventTopicPolicy": {
-      "DependsOn": "OGSHSNSTopic",
+      "DependsOn": "JSMSHSNSTopic",
       "Type": "AWS::SNS::TopicPolicy",
       "Properties": {
         "PolicyDocument": {
@@ -55,7 +55,7 @@
             }
           ]
         },
-        "Topics": [ { "Ref": "OGSHSNSTopic" } ]
+        "Topics": [ { "Ref": "JSMSHSNSTopic" } ]
       }
     }
   }
