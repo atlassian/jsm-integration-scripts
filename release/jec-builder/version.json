@@ -10,5 +10,6 @@
   "solarwinds-msp-n-central": "0.1.0",
   "solarwinds-npm": "0.1.0",
   "solarwinds-web-help-desk": "0.1.0",
-  "zenoss": "0.1.0"
+  "zenoss": "0.1.0",
+  "zabbix": "0.1.0"
 }
