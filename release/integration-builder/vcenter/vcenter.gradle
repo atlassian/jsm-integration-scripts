@@ -1,0 +1,30 @@
+task prepareVCenter() << {
+    def destination = "${project.buildDir}/jsm"
+    copy {
+        from "${project.buildDir}/jsm-integration"
+        into "${destination}/jsm-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/vcenter/scripts/send2jsm.go"
+        into "${destination}/jsm"
+    }
+
+    copy {
+        from "${project.projectDir}/vcenter/scripts/send2jsm.exe"
+        into "${destination}/jsm"
+    }
+
+    copy {
+        from "${project.projectDir}/vcenter/conf/integration.conf"
+        into "${destination}/jsm/jsm-integration/conf"
+    }
+}
+task packageVCenterZip(dependsOn: 'prepareVCenter', type: Zip) {
+    from "${project.buildDir}/jsm"
+    baseName = 'jsm-vcenter'
+    version = project.ext.versions.vcenter + project.ext.versionSuffix
+
+
+}
+task vcenter(dependsOn: ['packageVCenterZip'])

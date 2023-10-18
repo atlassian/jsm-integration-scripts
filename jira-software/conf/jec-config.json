@@ -1,0 +1,63 @@
+{
+  "apiKey": "<API_KEY>",
+  "baseUrl": "https://api.atlassian.com",
+  "logLevel": "DEBUG",
+  "globalArgs": [],
+  "globalFlags": {
+    "url": "<url>",
+    "username": "<username>",
+    "password": "<password>",
+    "issueTypeName": "<issue_type_name>",
+    "projectKey": "<key_of_project>"
+  },
+  "actionMappings": {
+    "createIssue": {
+      "filepath": "<path_of_script>",
+      "sourceType": "<local | git>",
+      "env": [],
+      "stdout": "<path_of_output_file_of_script>"
+    },
+    "resolveIssue": {
+      "filepath": "<path_of_script>",
+      "sourceType": "<local | git>",
+      "env": [],
+      "stdout": "<path_of_output_file_of_script>"
+    },
+    "inProgressIssue": {
+      "filepath": "<path_of_script>",
+      "sourceType": "<local | git>",
+      "env": [],
+      "stdout": "<path_of_output_file_of_script>"
+    },
+    "closeIssue": {
+      "filepath": "<path_of_script>",
+      "sourceType": "<local | git>",
+      "env": [],
+      "stdout": "<path_of_output_file_of_script>"
+    },
+    "issueDone": {
+      "filepath": "<path_of_script>",
+      "sourceType": "<local | git>",
+      "env": [],
+      "stdout": "<path_of_output_file_of_script>"
+    },
+    "addCommentToIssue": {
+      "filepath": "<path_of_script>",
+      "sourceType": "<local | git>",
+      "env": [],
+      "stdout": "<path_of_output_file_of_script>"
+    }
+  },
+  "pollerConf": {
+    "pollingWaitIntervalInMillis": 100,
+    "visibilityTimeoutInSec": 30,
+    "maxNumberOfMessages": 10
+  },
+  "poolConf": {
+    "maxNumberOfWorker": 12,
+    "minNumberOfWorker": 4,
+    "monitoringPeriodInMillis": 15000,
+    "keepAliveTimeInMillis": 6000,
+    "queueSize": 0
+  }
+}

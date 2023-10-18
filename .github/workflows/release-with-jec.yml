@@ -19,6 +19,13 @@ on:
           - solarwinds-web-help-desk
           - zenoss
           - zabbix
+          - bmc-footprints-v11
+          - bmc-footprints-v12
+          - bmc-remedy
+          - cherwell
+          - jira-service-management
+          - jira-software
+          - trackit
       jec-version:
         description: 'Version of JEC'
         required: true
