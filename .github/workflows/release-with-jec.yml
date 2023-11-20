@@ -18,6 +18,7 @@ on:
           - solarwinds-npm
           - solarwinds-web-help-desk
           - zenoss
+          - zabbix
       jec-version:
         description: 'Version of JEC'
         required: true
