@@ -1,0 +1,165 @@
+trigger jsmTrigger on BMCServiceDesk__Incident__c (after insert, after update) {
+string endpoint = 'https://api.atlassian.com/jsm/ops/integration/v1/json/bmcremedyforce';
+string apiKey='CUSTOMER_GENERATED_JSM_API_KEY';
+
+BMCServiceDesk__Incident__c obj = Trigger.new[0];
+
+string id=obj.Id;
+string ownerid=obj.OwnerId;
+string name=obj.Name;
+Datetime createddate=obj.CreatedDate;
+string categoryid=obj.BMCServiceDesk__Category_ID__c;
+string clientname=obj.BMCServiceDesk__Client_Name__c;
+string impactid=obj.BMCServiceDesk__Impact_Id__c;
+string priorityid=obj.BMCServiceDesk__Priority_ID__c;
+Datetime statuschangeDate=obj.BMCServiceDesk__StatusChangeDate__c;
+string statusid=obj.BMCServiceDesk__Status_ID__c;
+string urgencyid=obj.BMCServiceDesk__Urgency_ID__c;
+string clientemail=obj.BMCServiceDesk__clientEmail__c;
+string clientfirstname=obj.BMCServiceDesk__clientFirstName__c;
+string clientid=obj.BMCServiceDesk__clientId__c;
+string clientlastname=obj.BMCServiceDesk__clientLastName__c;
+Datetime duedatetime=obj.BMCServiceDesk__dueDateTime__c;
+string incidentdescription=obj.BMCServiceDesk__incidentDescription__c;
+string incidentresolution=obj.BMCServiceDesk__incidentResolution__c;
+Datetime opendatetime=obj.BMCServiceDesk__openDateTime__c;
+string shortdescription=obj.BMCServiceDesk__shortDescription__c;
+Datetime systemmodstamp =obj.SystemModstamp;
+Datetime lastactivitydate=obj.LastActivityDate;
+string approvalstatus=obj.BMCServiceDesk__ACApprovalStatus__c;
+string severity=obj.BMCServiceDesk__ACSeverity__c;
+Decimal actualoutagetimehour=obj.BMCServiceDesk__Actual_Outage_Time_Hours__c;
+string additionalemail=obj.BMCServiceDesk__Additional_email_information__c;
+Boolean alltaskclosecontroller=obj.BMCServiceDesk__AllTaskCloseController__c;
+Boolean approved=obj.BMCServiceDesk__Approved__c;
+string clientaccount=obj.BMCServiceDesk__Client_Account__c;
+string clientmanager=obj.BMCServiceDesk__Client_Manager__c;
+string clientphone=obj.BMCServiceDesk__Client_Phone__c;
+string clienttype=obj.BMCServiceDesk__Client_Type__c;
+string clockstatus=obj.BMCServiceDesk__Clock_Status__c;
+string closedby=obj.BMCServiceDesk__Closed_By__c;
+string closurecategory=obj.BMCServiceDesk__ClosureCategory__c;
+string duedateprogress=obj.BMCServiceDesk__Due_Date_Progress__c;
+string emailserviceaddress=obj.BMCServiceDesk__EmailServiceAddress__c;
+string eventid=obj.BMCServiceDesk__Event_ID__c;
+string incidenttype=obj.BMCServiceDesk__IncidentType__c;
+Boolean isnewrecord=obj.BMCServiceDesk__Is_New_Record__c;
+string newincident=obj.BMCServiceDesk__New_Incident__c;
+string preferredcontactmethod=obj.BMCServiceDesk__PreferredContactMethod__c;
+Decimal totalworktime=obj.BMCServiceDesk__TotalWorkTime__c;
+string type=obj.BMCServiceDesk__Type__c;
+Decimal updatecount=obj.BMCServiceDesk__UpdateCount__c;
+Datetime closedatetime=obj.BMCServiceDesk__closeDateTime__c;
+Boolean closetasks=obj.BMCServiceDesk__closeTasks__c;
+Datetime completeddate=obj.BMCServiceDesk__completedDate__c;
+string contacttype=obj.BMCServiceDesk__contactType__c;
+Decimal maximumduration=obj.BMCServiceDesk__maximumDuration__c;
+string note=obj.BMCServiceDesk__note__c;
+Datetime outagefrom=obj.BMCServiceDesk__outageFrom__c;
+Datetime outageto=obj.BMCServiceDesk__outageTo__c;
+string queuename=obj.BMCServiceDesk__queueName__c;
+Datetime recommendedfixdatetime=obj.BMCServiceDesk__recommendedFixDateTime__c;
+Datetime respondeddatetime=obj.BMCServiceDesk__respondedDateTime__c;
+Datetime responsedatetime=obj.BMCServiceDesk__responseDateTime__c;
+Boolean state=obj.BMCServiceDesk__state__c;
+Decimal timespent=obj.BMCServiceDesk__timeSpent__c;
+Decimal totalduration=obj.BMCServiceDesk__Total_Duration__c;
+Boolean incorrectcategory=obj.BMCServiceDesk__Incorrect_category__c;
+string alternatcontactname=obj.Alternate_Contact_Name__c;
+string alternatcontactnumber=obj.Alternate_Contact_Number__c;
+string externalticketref=obj.External_Ticket_Ref__c;
+string affectedapplication=obj.Affected_Application__c;
+string affectedhardware=obj.Affected_Hardware__c;
+Decimal timetoclose=obj.BMCServiceDesk__RF_TimeToClose__c;
+string customField1='';
+string customField2='';
+string customField3='';
+string customField4='';
+string customField5='';
+string customField6='';
+string customField7='';
+string customField8='';
+string customField9='';
+string customField10='';
+
+string payload= '{'+
+'\"id\" :' + jsmClass.getPayloadStringByHandlingNull(id)+ ',' +
+'\"ownerId\" :' + jsmClass.getPayloadStringByHandlingNull(ownerid )+ ',' +
+'\"name\" :' + jsmClass.getPayloadStringByHandlingNull(name)+ ',' +
+'\"createdDate\" :' + jsmClass.getPayloadStringByHandlingNull(createddate)+ ',' +
+'\"categoryID\" :' + jsmClass.getPayloadStringByHandlingNull(categoryid)+ ',' +
+'\"clientName\" :' + jsmClass.getPayloadStringByHandlingNull(clientname)+ ',' +
+'\"impactId\" :' + jsmClass.getPayloadStringByHandlingNull(impactid)+ ',' +
+'\"priorityId\" :' + jsmClass.getPayloadStringByHandlingNull(priorityid)+ ',' +
+'\"statusChangeDate\" :' + jsmClass.getPayloadStringByHandlingNull(statuschangedate)+ ',' +
+'\"statusId\" :' + jsmClass.getPayloadStringByHandlingNull(statusid)+ ',' +
+'\"urgencyId\" :' + jsmClass.getPayloadStringByHandlingNull(urgencyid)+ ',' +
+'\"clientEmail\" :' + jsmClass.getPayloadStringByHandlingNull(clientemail)+ ',' +
+'\"clientFirstName\" :' + jsmClass.getPayloadStringByHandlingNull(clientfirstname)+ ',' +
+'\"clientId\" :' + jsmClass.getPayloadStringByHandlingNull(clientid)+ ',' +
+'\"clientLastName\" :' + jsmClass.getPayloadStringByHandlingNull(clientlastname)+ ',' +
+'\"dueDateTime\" :' + jsmClass.getPayloadStringByHandlingNull(duedatetime)+ ',' +
+'\"incidentDescription\" :' + jsmClass.getPayloadStringByHandlingNull(incidentdescription)+ ',' +
+'\"incidentResolution\" :' + jsmClass.getPayloadStringByHandlingNull(incidentresolution)+ ',' +
+'\"openDateTime\" :' + jsmClass.getPayloadStringByHandlingNull(opendatetime)+ ',' +
+'\"shortDescription\" :' + jsmClass.getPayloadStringByHandlingNull(shortdescription)+ ',' +
+'\"systemModStamp\" :' + jsmClass.getPayloadStringByHandlingNull(systemmodstamp)+ ',' +
+'\"lastActivityDate\" :' + jsmClass.getPayloadStringByHandlingNull(lastactivitydate)+ ',' +
+'\"approvalStatus\" :' + jsmClass.getPayloadStringByHandlingNull(approvalstatus)+ ',' +
+'\"severity\" :' + jsmClass.getPayloadStringByHandlingNull(severity)+ ',' +
+'\"actualOutageTimeHour\" :' + jsmClass.getPayloadStringByHandlingNull(actualoutagetimehour)+ ',' +
+'\"additionalEmail\" :' + jsmClass.getPayloadStringByHandlingNull(additionalemail)+ ',' +
+'\"allTaskCloseController\" :' +jsmClass.getPayloadStringByHandlingNull(alltaskclosecontroller)+ ',' +
+'\"approved\" :' + jsmClass.getPayloadStringByHandlingNull(approved) + ',' +
+'\"clientAccount\" :' + jsmClass.getPayloadStringByHandlingNull(clientaccount)+ ',' +
+'\"clientManager\" :' + jsmClass.getPayloadStringByHandlingNull(clientmanager)+ ',' +
+'\"clientPhone\" :' + jsmClass.getPayloadStringByHandlingNull(clientphone)+ ',' +
+'\"clientType\" :' + jsmClass.getPayloadStringByHandlingNull(clienttype)+ ',' +
+'\"clockStatus\" :' + jsmClass.getPayloadStringByHandlingNull(clockstatus)+ ',' +
+'\"closedBy\" :' + jsmClass.getPayloadStringByHandlingNull(closedby)+ ',' +
+'\"closureCategory\" :' + jsmClass.getPayloadStringByHandlingNull(closurecategory)+ ',' +
+'\"dueDateProgress\" :' + jsmClass.getPayloadStringByHandlingNull(duedateprogress)+ ',' +
+'\"emailServiceAddress\" :' + jsmClass.getPayloadStringByHandlingNull(emailserviceaddress)+ ',' +
+'\"eventId\" :' + jsmClass.getPayloadStringByHandlingNull(eventid)+ ',' +
+'\"incidentType\" :' + jsmClass.getPayloadStringByHandlingNull(incidenttype)+ ',' +
+'\"isNewRecord\" :' +jsmClass.getPayloadStringByHandlingNull(isnewrecord)+ ',' +
+'\"newIncident\" :' + jsmClass.getPayloadStringByHandlingNull(newincident)+ ',' +
+'\"preferredContactMethod\" :' + jsmClass.getPayloadStringByHandlingNull(preferredcontactmethod)+ ',' +
+'\"totalWorkRime\" :' + jsmClass.getPayloadStringByHandlingNull(totalworktime)+ ',' +
+'\"type\" :' + jsmClass.getPayloadStringByHandlingNull(type)+ ',' +
+'\"updateCount\" :' + jsmClass.getPayloadStringByHandlingNull(updatecount)+ ',' +
+'\"closeDateTime\" :' + jsmClass.getPayloadStringByHandlingNull(closedatetime)+ ',' +
+'\"closeTasks\" :' + jsmClass.getPayloadStringByHandlingNull(closetasks)+ ',' +
+'\"completedDate\" :' + jsmClass.getPayloadStringByHandlingNull(completeddate)+ ',' +
+'\"contactType\" :' + jsmClass.getPayloadStringByHandlingNull(contacttype)+ ',' +
+'\"maximumDuration\" :' + jsmClass.getPayloadStringByHandlingNull(maximumduration)+ ',' +
+'\"note\" :' + jsmClass.getPayloadStringByHandlingNull(note)+ ',' +
+'\"outageFrom\" :' + jsmClass.getPayloadStringByHandlingNull(outagefrom)+ ',' +
+'\"outageTo\" :' + jsmClass.getPayloadStringByHandlingNull(outageto)+ ',' +
+'\"queueName\" :' + jsmClass.getPayloadStringByHandlingNull(queuename)+ ',' +
+'\"recommendedFixDateTime\" :' + jsmClass.getPayloadStringByHandlingNull(recommendedfixdatetime)+ ',' +
+'\"respondedDateTime\" :' + jsmClass.getPayloadStringByHandlingNull(respondeddatetime)+ ',' +
+'\"responsedDateTime\" :' + jsmClass.getPayloadStringByHandlingNull(responsedatetime)+ ',' +
+'\"state\" :' + jsmClass.getPayloadStringByHandlingNull(state)+ ',' +
+'\"timeSpent\" :' + jsmClass.getPayloadStringByHandlingNull(timespent)+ ',' +
+'\"totalDuration\" :' + jsmClass.getPayloadStringByHandlingNull(totalduration)+ ',' +
+'\"inCorrectCategory\" :' + jsmClass.getPayloadStringByHandlingNull(incorrectcategory)+ ',' +
+'\"alternatContactName\" :' + jsmClass.getPayloadStringByHandlingNull(alternatcontactname)+ ',' +
+'\"alternatContactNumber\" :' + jsmClass.getPayloadStringByHandlingNull(alternatcontactnumber)+ ',' +
+'\"externalTicketRef\" :' + jsmClass.getPayloadStringByHandlingNull(externalticketref)+ ',' +
+'\"affectedApplication\" :' + jsmClass.getPayloadStringByHandlingNull(affectedapplication)+ ',' +
+'\"affectedHardware\" :' + jsmClass.getPayloadStringByHandlingNull(affectedhardware)+ ',' +
+'\"timeToClose\" :' + jsmClass.getPayloadStringByHandlingNull(timetoclose) +',' +
+'\"customField1\" :' + jsmClass.getPayloadStringByHandlingNull(customField1) +',' +
+'\"customField2\" :' + jsmClass.getPayloadStringByHandlingNull(customField2) +',' +
+'\"customField3\" :' + jsmClass.getPayloadStringByHandlingNull(customField3) +',' +
+'\"customField4\" :' + jsmClass.getPayloadStringByHandlingNull(customField4) +',' +
+'\"customField5\" :' + jsmClass.getPayloadStringByHandlingNull(customField5) +',' +
+'\"customField6\" :' + jsmClass.getPayloadStringByHandlingNull(customField6) +',' +
+'\"customField7\" :' + jsmClass.getPayloadStringByHandlingNull(customField7) +',' +
+'\"customField8\" :' + jsmClass.getPayloadStringByHandlingNull(customField8) +',' +
+'\"customField9\" :' + jsmClass.getPayloadStringByHandlingNull(customField9) +',' +
+'\"customField10\" :' + jsmClass.getPayloadStringByHandlingNull(customField10) +
+'}';
+jsmClass.xRESTCall(endpoint+'?apiKey='+apiKey,payload);
+}

@@ -11,5 +11,12 @@
   "solarwinds-npm": "0.1.0",
   "solarwinds-web-help-desk": "0.1.0",
   "zenoss": "0.1.0",
-  "zabbix": "0.1.0"
+  "zabbix": "0.1.0",
+  "bmc-footprints-v11": "0.1.0",
+  "bmc-footprints-v12": "0.1.0",
+  "bmc-remedy": "0.1.0",
+  "cherwell": "0.1.0",
+  "jira-service-management": "0.1.0",
+  "jira-software": "0.1.0",
+  "trackit": "0.1.0"
 }

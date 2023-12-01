@@ -1,0 +1,90 @@
+task prepareVCSA() << {
+    def destination = "${project.buildDir}/vcsa"
+    copy {
+        from "${project.buildDir}/jsm-integration"
+        into "${destination}/jsm-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/vcsa/scripts/send2jsm.go"
+        into "${destination}/vcsa"
+    }
+
+    copy {
+        from "${project.projectDir}/vcsa/scripts/send2jsm"
+        into "${destination}/vcsa"
+    }
+
+    copy {
+        from "${project.projectDir}/vcsa/conf/integration.conf"
+        into "${destination}/jsm-integration/conf"
+    }
+}
+
+def buildRpmForVCSA(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+    def taskName = "generateRpm${sourceDir}"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}"(type: Rpm) {
+        def packageVersion = project.ext.versions.vcsa + project.ext.versionSuffix
+
+        packageName = name
+        description = descrpt
+        summary = descrpt
+        packageDescription = descrpt + ". Please see doc for details: https://www.atlassian.com/docs/"
+        version = packageVersion.replace("-", ".");
+        os = LINUX
+        user = 'root'
+
+        release = '1.all'
+        packager = "ifountain"
+        vendor = "Atlassian"
+        url = "https://www.atlassian.com"
+        license = "Apache License 2.0"
+        buildHost = "repo.atlassian.com"
+        packageGroup = "System Administration Tools"
+
+
+        configFiles.put("${project.buildDir}/${sourceDir}/jsm-integration/conf/integration.conf", 'etc/jsm/conf')
+
+        for (def source : configFiles.keySet()) {
+            def dest = configFiles.get(source)
+            logger.info("config " + source + " - " + dest)
+            from(source) {
+                fileType CONFIG | NOREPLACE
+                into(dest)
+            }
+        }
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            from(source) {
+                into(dest)
+            }
+        }
+
+        preInstall file("${project.projectDir}/vcsa/native/ogBefore.sh")
+        postInstall file("${project.projectDir}/vcsa/native/ogAfter.sh")
+    }
+
+    tasks[taskName].execute()
+}
+
+task packageVCSAOS(dependsOn: 'prepareVCSA') << {
+
+    def fileMapping = [
+            "${project.projectDir}/vcsa/scripts/send2jsm"   : "etc/jsm",
+            "${project.projectDir}/vcsa/scripts/send2jsm.go": "etc/jsm"
+    ]
+
+    buildRpmForVCSA('vcsa', 'jsm-vcsa', 'JSM - VCSA integration files',
+            fileMapping, [:])
+
+}
+
+task vcsa(dependsOn: 'packageVCSAOS')
