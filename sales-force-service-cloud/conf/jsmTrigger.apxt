@@ -1,0 +1,79 @@
+trigger jsmTrigger on Case (after insert, after update) {
+	string endpoint = <JSM_API_URL>;
+	Case obj = Trigger.new[0];
+
+  string id=obj.Id;
+	string ownerId=obj.OwnerId;
+    boolean isDeleted = obj.IsDeleted;
+    string caseNumber = obj.CaseNumber;
+    string contactId = obj.ContactId;
+    string accountId = obj.AccountId;
+    string assetId = obj.AssetId;
+    string parentId = obj.ParentId;
+    string suppliedName = obj.SuppliedName;
+    string suppliedEmail = obj.SuppliedEmail;
+    string suppliedCompany = obj.SuppliedCompany;
+    string suppliedPhone = obj.SuppliedPhone;
+    string typeOfCase = obj.Type;
+    string status = obj.Status;
+    string reason = obj.Reason;
+    string origin = obj.Origin;
+    string subject = obj.Subject;
+    string description = obj.Description;
+    boolean isClosed = obj.IsClosed;
+    string priority = obj.Priority;
+    datetime closedDate = obj.ClosedDate;
+    boolean isEscalated = obj.IsEscalated;
+    boolean isClosedOnCreate = obj.IsClosedOnCreate;
+    datetime createdDate = obj.CreatedDate;
+    string createdById = obj.CreatedById;
+    datetime lastModifiedDate = obj.LastModifiedDate;
+    string lastModifiedById = obj.LastModifiedById;
+    datetime systemModstamp = obj.SystemModstamp;
+    string contactPhone = obj.ContactPhone;
+    string contactMobile = obj.ContactMobile;
+    string contactFax = obj.ContactFax;
+    string engineeringReqNumber = obj.EngineeringReqNumber__c;
+    string product = obj.Product__c;
+    string potentialLiability = obj.PotentialLiability__c;
+
+   string payload= '{'+
+'\"id\" :' + jsmClass.getPayloadStringByHandlingNull(id)+ ',' +
+'\"ownerId\" :' + jsmClass.getPayloadStringByHandlingNull(ownerId )+ ',' +
+'\"isDeleted\" :' + jsmClass.getPayloadStringByHandlingNull(isDeleted)+ ',' +
+'\"caseNumber\" :' + jsmClass.getPayloadStringByHandlingNull(caseNumber)+ ',' +
+'\"contactId\" :' + jsmClass.getPayloadStringByHandlingNull(contactId)+ ',' +
+'\"accountId\" :' + jsmClass.getPayloadStringByHandlingNull(accountId)+ ',' +
+'\"assetId\" :' + jsmClass.getPayloadStringByHandlingNull(assetId)+ ',' +
+'\"priority\" :' + jsmClass.getPayloadStringByHandlingNull(priority)+ ',' +
+'\"parentId\" :' + jsmClass.getPayloadStringByHandlingNull(parentId)+ ',' +
+'\"suppliedName\" :' + jsmClass.getPayloadStringByHandlingNull(suppliedName)+ ',' +
+'\"suppliedEmail\" :' + jsmClass.getPayloadStringByHandlingNull(suppliedEmail)+ ',' +
+'\"suppliedCompany\" :' + jsmClass.getPayloadStringByHandlingNull(suppliedCompany)+ ',' +
+'\"suppliedPhone\" :' + jsmClass.getPayloadStringByHandlingNull(suppliedPhone)+ ',' +
+'\"typeOfCase\" :' + jsmClass.getPayloadStringByHandlingNull(typeOfCase)+ ',' +
+'\"status\" :' + jsmClass.getPayloadStringByHandlingNull(status)+ ',' +
+'\"reason\" :' + jsmClass.getPayloadStringByHandlingNull(reason)+ ',' +
+'\"origin\" :' + jsmClass.getPayloadStringByHandlingNull(origin)+ ',' +
+'\"subject\" :' + jsmClass.getPayloadStringByHandlingNull(subject)+ ',' +
+'\"description\" :' + jsmClass.getPayloadStringByHandlingNull(description)+ ',' +
+'\"isClosed\" :' + jsmClass.getPayloadStringByHandlingNull(isClosed)+ ',' +
+'\"closedDate\" :' + jsmClass.getPayloadStringByHandlingNull(closedDate)+ ',' +
+'\"isEscalated\" :' + jsmClass.getPayloadStringByHandlingNull(isEscalated)+ ',' +
+'\"isClosedOnCreate\" :' + jsmClass.getPayloadStringByHandlingNull(isClosedOnCreate)+ ',' +
+'\"createdDate\" :' + jsmClass.getPayloadStringByHandlingNull(createdDate)+ ',' +
+'\"createdById\" :' + jsmClass.getPayloadStringByHandlingNull(createdById)+ ',' +
+'\"lastModifiedDate\" :' + jsmClass.getPayloadStringByHandlingNull(lastModifiedDate)+ ',' +
+'\"systemModstamp\" :' +jsmClass.getPayloadStringByHandlingNull(systemModstamp)+ ',' +
+'\"contactPhone\" :' + jsmClass.getPayloadStringByHandlingNull(contactPhone) + ',' +
+'\"contactMobile\" :' + jsmClass.getPayloadStringByHandlingNull(contactMobile)+ ',' +
+'\"contactFax\" :' + jsmClass.getPayloadStringByHandlingNull(contactFax)+ ',' +
+'\"engineeringReqNumber\" :' + jsmClass.getPayloadStringByHandlingNull(engineeringReqNumber)+ ',' +
+'\"product\" :' + jsmClass.getPayloadStringByHandlingNull(product)+ ',' +
+'\"potentialLiability\" :' + jsmClass.getPayloadStringByHandlingNull(potentialLiability)+
+'}';
+
+  jsmClass.xRESTCall(endpoint ,payload);
+
+
+}

@@ -1,0 +1,38 @@
+#!/usr/bin/python
+# Jira Service Management
+
+import json
+import os
+import urllib2
+
+
+def main():
+    context = dict([(var[7:], value.decode("utf-8"))
+                    for (var, value) in os.environ.items()
+                    if var.startswith("NOTIFY_")])
+
+    if "PARAMETER_1" in context:
+        jsm_api_url = context["PARAMETER_1"]
+
+        if "PARAMETER_1" in context.keys():
+            del context["PARAMETER_1"]
+        if "PARAMETERS" in context.keys():
+            del context["PARAMETERS"]
+    else:
+        return "No API Key Specified."
+
+    req = urllib2.Request(url=jsm_api_url)
+    req.add_header('Content-Type', 'application/json')
+
+    try:
+        urllib2.urlopen(req, json.dumps(context))
+        is_success = True
+    except:
+        is_success = False
+
+    if is_success:
+        return "Script finished successfully."
+    else:
+        return "Script failed."
+
+main()
