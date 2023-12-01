@@ -23,6 +23,16 @@
 > * solarwinds-npm
 > * solarwinfs-web-help-desk
 > * zenoss
+> * zabbix
+> * bmc-footprints-v11
+> * bmc-footprints-v12
+> * bmc-remedy
+> * cherwell
+> * jira-service-management
+> * jira-software
+> * trackit
+> * graylog-plugin
+> * logstash-output-plugin
 
 ## Installation and Documentation
 
