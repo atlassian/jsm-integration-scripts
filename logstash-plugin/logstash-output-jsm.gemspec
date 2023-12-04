@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
 
   # Special flag to let us know this is actually a logstash plugin
-  s.metadata = { "logstash_plugin" => "true", "logstash_group" => "output" }
+  s.metadata = { "logstash_plugin" => "true", "logstash_group" => "output", "source_code_uri" => "https://github.com/atlassian/jsm-integration-scripts/tree/master/logstash-plugin"}
 
   # Gem dependencies
   s.add_runtime_dependency "logstash-core-plugin-api", ">= 1.60", "<= 2.99"
