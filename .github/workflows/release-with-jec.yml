@@ -29,6 +29,11 @@ on:
       jec-version:
         description: 'Version of JEC'
         required: true
+
+permissions:
+  pull-requests: write
+  contents: write
+
 jobs:
   setup:
     name: Setup For ${{ github.event.inputs.integration }} Release
@@ -419,3 +424,54 @@ jobs:
         asset_path: .release/jec-win64/${{ env.INTEGRATION_FOLDER }}.zip
         asset_name: ${{ env.INTEGRATION_FOLDER }}.zip
         asset_content_type: application/zip
+  update-versions:
+    name: Update versions
+    runs-on: ubuntu-latest
+    needs: [ setup ]
+    env:
+      INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Set name to env
+        id: setup
+        run: |
+          IFS='-' read -r name version <<< "$(basename $GITHUB_REF)"
+          echo ::set-output name=INTEGRATION_VERSION::$version
+      - name: Checkout the repository with branch
+        uses: actions/checkout@v4
+      - name: Set branch name to env
+        id: prepare-branch-name
+        run: |
+          branchName=release-${INTEGRATION_NAME}-$(date +%s)
+          echo branchName:$branchName
+          echo ::set-output name=BRANCH_NAME::$(echo $branchName)
+      - name: Commit and push changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ steps.prepare-branch-name.outputs.branch_name }}
+        run: |
+          INTEGRATION_NAME=${{ env.INTEGRATION_NAME }}
+          BRANCH_NAME=${{ env.BRANCH_NAME }}
+          version_file="release/jec-builder/version.json"
+
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'support@atlassian.com'
+          git checkout "$BRANCH_NAME" 2>/dev/null || git checkout -b "$BRANCH_NAME"
+
+          current_version=$(jq -r --arg integration "$INTEGRATION_NAME" '.[$integration]' "$version_file")
+          new_version=$(echo "$current_version" | awk -F. -v OFS=. '{$3++;print}')
+          echo "Updating $INTEGRATION_NAME version from $current_version to $new_version in $version_file"
+          jq --arg new_version "$new_version" --arg integration "$INTEGRATION_NAME" '.[$integration] = $new_version' "$version_file" >temp.json && mv temp.json "$version_file"
+
+          echo "Committing changes"
+          git commit -am "Update version file after release(s)"
+
+          echo "Pushing changes"
+          git push origin "$BRANCH_NAME"
+
+          echo "Creating pull request"
+          gh pr create --title "Update $INTEGRATION_NAME version" \
+            --body "Update $INTEGRATION_NAME version from $current_version to $new_version" \
+            --base master \
+            --head $BRANCH_NAME \
+            --reviewer ${{ github.actor }}
