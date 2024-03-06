@@ -29,6 +29,21 @@ on:
       jec-version:
         description: 'Version of JEC'
         required: true
+  workflow_call:
+    inputs:
+      integration:
+        description: 'Integration Type'
+        required: true
+        type: string
+      jec-version:
+        description: 'Version of JEC'
+        required: true
+        type: string
+      is_workflow_call:
+        description: 'To distinguish workflow_call from other events'
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   pull-requests: write
@@ -36,7 +51,7 @@ permissions:
 
 jobs:
   setup:
-    name: Setup For ${{ github.event.inputs.integration }} Release
+    name: Setup For ${{ inputs.integration }} Release
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{  steps.create_release.outputs.upload_url }}
@@ -48,18 +63,18 @@ jobs:
     - name: Retrieve Integration Version
       id: gather_params
       run: |
-        echo ::set-output name=INTEGRATION_VERSION::$(jq -r --arg v "${{ github.event.inputs.integration }}" '.[$v]' release/jec-builder/version.json)
-        echo ::set-output name=INTEGRATION_NAME::$(echo "${{ github.event.inputs.integration }}" | awk '{print tolower($0)}')
-    - name: Create ${{ github.event.inputs.integration }} Release
+        echo ::set-output name=INTEGRATION_VERSION::$(jq -r --arg v "${{ inputs.integration }}" '.[$v]' release/jec-builder/version.json)
+        echo ::set-output name=INTEGRATION_NAME::$(echo "${{ inputs.integration }}" | awk '{print tolower($0)}')
+    - name: Create ${{ inputs.integration }} Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         INTEGRATION_VERSION: ${{ steps.gather_params.outputs.INTEGRATION_VERSION }}
-        INTEGRATION_NAME: ${{ github.event.inputs.integration }}
+        INTEGRATION_NAME: ${{ inputs.integration }}
       with:
-        tag_name: ${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}_jec-${{ github.event.inputs.jec-version }}
-        release_name: ${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}_jec-${{ github.event.inputs.jec-version }}
+        tag_name: ${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}_jec-${{ inputs.jec-version }}
+        release_name: ${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}_jec-${{ inputs.jec-version }}
         draft: true
   linux:
     name: Linux
@@ -85,12 +100,12 @@ jobs:
       with:
         owner: atlassian
         repo: jec
-        tag: ${{ github.event.inputs.jec-version }}
-        file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
+        tag: ${{ inputs.jec-version }}
+        file: jec-linux-amd64-${{ inputs.jec-version }}.zip
     - name: Extracting Linux Package
-      run: unzip -qq jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
+      run: unzip -qq jec-linux-amd64-${{ inputs.jec-version }}.zip -d .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
     - name: Copy Integration Files
-      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
+      run: cp -R ${{ inputs.integration }}/. .release/jec-linux/${{ env.INTEGRATION_FOLDER }}
     - name: Remove http script (todo remove when http version is released)
       run: rm -f .release/jec-linux/${{ env.INTEGRATION_FOLDER }}/scripts/http.py
     - name: Check Incoming part exists
@@ -148,14 +163,14 @@ jobs:
       with:
         owner: atlassian
         repo: jec
-        tag: ${{ github.event.inputs.jec-version }}
-        file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
+        tag: ${{ inputs.jec-version }}
+        file: jec-linux-amd64-${{ inputs.jec-version }}.zip
     - name: Extracting Linux Package
-      run: unzip -qq jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-rpm
+      run: unzip -qq jec-linux-amd64-${{ inputs.jec-version }}.zip -d .release/jec-rpm
     - name: Copy SPEC Files
       run: cp -R release/jec-builder/jec-rpm/. .release/jec-rpm
     - name: Copy Integration Files
-      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-rpm/jec-scripts
+      run: cp -R ${{ inputs.integration }}/. .release/jec-rpm/jec-scripts
     - name: Check Incoming part exists
       id: check_files
       uses: andstor/file-existence-action@v1
@@ -240,16 +255,16 @@ jobs:
       with:
         owner: atlassian
         repo: jec
-        tag: ${{ github.event.inputs.jec-version }}
-        file: jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip
+        tag: ${{ inputs.jec-version }}
+        file: jec-linux-amd64-${{ inputs.jec-version }}.zip
     - name: Extracting Linux Package
-      run: unzip -qq jec-linux-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-deb/usr/local/bin
+      run: unzip -qq jec-linux-amd64-${{ inputs.jec-version }}.zip -d .release/jec-deb/usr/local/bin
     - name: Copy SPEC Files
       run: cp -R release/jec-builder/jec-deb/. .release/jec-deb
     - name: Create Output Directory
       run: mkdir -p .release/jec-deb/home/jsm/jec
     - name: Copy Integration Files
-      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-deb/home/jsm/jec
+      run: cp -R ${{ inputs.integration }}/. .release/jec-deb/home/jsm/jec
     - name: Check Incoming part exists
       id: check_files
       uses: andstor/file-existence-action@v1
@@ -316,14 +331,14 @@ jobs:
       with:
         owner: atlassian
         repo: jec
-        tag: ${{ github.event.inputs.jec-version }}
-        file: jec-win-386-${{ github.event.inputs.jec-version }}.zip
+        tag: ${{ inputs.jec-version }}
+        file: jec-win-386-${{ inputs.jec-version }}.zip
     - name: Extracting Win32 Package
-      run: unzip -qq jec-win-386-${{ github.event.inputs.jec-version }}.zip -d .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
+      run: unzip -qq jec-win-386-${{ inputs.jec-version }}.zip -d .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
     - name: Copy JEC Service Conf
       run: cp -R release/jec-builder/jec-win32/jecService.json.example .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
     - name: Copy Integration Files
-      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
+      run: cp -R ${{ inputs.integration }}/. .release/jec-win32/${{ env.INTEGRATION_FOLDER }}
     - name: Remove http script (todo remove when http version is released)
       run: rm -f .release/jec-win32/${{ env.INTEGRATION_FOLDER }}/scripts/http.py
     - name: Check Incoming part exists
@@ -382,14 +397,14 @@ jobs:
       with:
         owner: atlassian
         repo: jec
-        tag: ${{ github.event.inputs.jec-version }}
-        file: jec-win-amd64-${{ github.event.inputs.jec-version }}.zip
+        tag: ${{ inputs.jec-version }}
+        file: jec-win-amd64-${{ inputs.jec-version }}.zip
     - name: Extracting Win64 Package
-      run: unzip -qq jec-win-amd64-${{ github.event.inputs.jec-version }}.zip -d .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
+      run: unzip -qq jec-win-amd64-${{ inputs.jec-version }}.zip -d .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
     - name: Copy JEC Service Conf
       run: cp -R release/jec-builder/jec-win64/jecService.json.example .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
     - name: Copy Integration Files
-      run: cp -R ${{ github.event.inputs.integration }}/. .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
+      run: cp -R ${{ inputs.integration }}/. .release/jec-win64/${{ env.INTEGRATION_FOLDER }}
     - name: Remove http script (todo remove when http version is released)
       run: rm -f .release/jec-win64/${{ env.INTEGRATION_FOLDER }}/scripts/http.py
     - name: Check Incoming part exists
@@ -430,13 +445,8 @@ jobs:
     needs: [ setup ]
     env:
       INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && inputs.is_workflow_call != true
     steps:
-      - name: Set name to env
-        id: setup
-        run: |
-          IFS='-' read -r name version <<< "$(basename $GITHUB_REF)"
-          echo ::set-output name=INTEGRATION_VERSION::$version
       - name: Checkout the repository with branch
         uses: actions/checkout@v4
       - name: Set branch name to env
@@ -463,13 +473,8 @@ jobs:
           echo "Updating $INTEGRATION_NAME version from $current_version to $new_version in $version_file"
           jq --arg new_version "$new_version" --arg integration "$INTEGRATION_NAME" '.[$integration] = $new_version' "$version_file" >temp.json && mv temp.json "$version_file"
 
-          echo "Committing changes"
           git commit -am "Update version file after release(s)"
-
-          echo "Pushing changes"
           git push origin "$BRANCH_NAME"
-
-          echo "Creating pull request"
           gh pr create --title "Update $INTEGRATION_NAME version" \
             --body "Update $INTEGRATION_NAME version from $current_version to $new_version" \
             --base master \

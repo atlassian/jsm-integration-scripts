@@ -11,6 +11,17 @@ on:
           - vcenter
           - vcsa
           - oem
+  workflow_call:
+    inputs:
+      integration:
+        description: 'Integration Type'
+        required: true
+        type: string
+      is_workflow_call:
+        description: 'To distinguish workflow_call from other events'
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   pull-requests: write
@@ -18,7 +29,7 @@ permissions:
 
 jobs:
   setup:
-    name: Setup For ${{ github.event.inputs.integration }} Release
+    name: Setup For ${{ inputs.integration }} Release
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{  steps.create_release.outputs.upload_url }}
@@ -30,15 +41,15 @@ jobs:
     - name: Retrieve Integration Version
       id: gather_params
       run: |
-        echo ::set-output name=INTEGRATION_VERSION::$(jq -r --arg v "${{ github.event.inputs.integration }}" '.[$v]' release/integration-builder/version.json)
-        echo ::set-output name=INTEGRATION_NAME::$(echo "${{ github.event.inputs.integration }}" | awk '{print tolower($0)}')
-    - name: Create ${{ github.event.inputs.integration }} Release
+        echo ::set-output name=INTEGRATION_VERSION::$(jq -r --arg v "${{ inputs.integration }}" '.[$v]' release/integration-builder/version.json)
+        echo ::set-output name=INTEGRATION_NAME::$(echo "${{ inputs.integration }}" | awk '{print tolower($0)}')
+    - name: Create ${{ inputs.integration }} Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         INTEGRATION_VERSION: ${{ steps.gather_params.outputs.INTEGRATION_VERSION }}
-        INTEGRATION_NAME: ${{ github.event.inputs.integration }}
+        INTEGRATION_NAME: ${{ inputs.integration }}
       with:
         tag_name: jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}
         release_name: jsm-${{ env.INTEGRATION_NAME }}-${{ env.INTEGRATION_VERSION }}
@@ -67,7 +78,7 @@ jobs:
       - name: Create Go Build Output Directory
         run: mkdir -p ./go-build/${{ env.INTEGRATION_NAME }}
       - name: Copy Integration Files
-        run: cp -R ${{ github.event.inputs.integration }}/. ./go-build/${{ env.INTEGRATION_NAME }}
+        run: cp -R ${{ inputs.integration }}/. ./go-build/${{ env.INTEGRATION_NAME }}
       - name: "Build Linux Go scripts"
         if: ${{env.INTEGRATION_NAME != 'vcenter'}}
         run: |
@@ -153,13 +164,8 @@ jobs:
     needs: [ setup ]
     env:
       INTEGRATION_NAME: ${{ needs.setup.outputs.integration_name }}
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && inputs.is_workflow_call != true
     steps:
-      - name: Set name to env
-        id: setup
-        run: |
-          IFS='-' read -r name version <<< "$(basename $GITHUB_REF)"
-          echo ::set-output name=INTEGRATION_VERSION::$version
       - name: Checkout the repository with branch
         uses: actions/checkout@v4
       - name: Set branch name to env
@@ -186,13 +192,8 @@ jobs:
           echo "Updating $INTEGRATION_NAME version from $current_version to $new_version in $version_file"
           jq --arg new_version "$new_version" --arg integration "$INTEGRATION_NAME" '.[$integration] = $new_version' "$version_file" >temp.json && mv temp.json "$version_file"
 
-          echo "Committing changes"
           git commit -am "Update version file after release(s)"
-          
-          echo "Pushing changes"
           git push origin "$BRANCH_NAME"
-
-          echo "Creating pull request"
           gh pr create --title "Update $INTEGRATION_NAME version" \
             --body "Update $INTEGRATION_NAME version from $current_version to $new_version" \
             --base master \
