@@ -1,0 +1,77 @@
+name: Release All Integrations with JEC scripts
+on:
+  workflow_dispatch:
+    inputs:
+      jec-version:
+        description: 'Version of JEC'
+        required: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      integrations: ${{  steps.gather_params.outputs.INTEGRATIONS }}
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+      - name: Retrieve Integration Version
+        id: gather_params
+        run: |
+          echo ::set-output name=INTEGRATIONS::$(jq 'del(.jecVersion)' release/jec-builder/version.json | jq -r 'keys')
+  release-integrations:
+    needs: [ setup ]
+    strategy:
+      matrix:
+        integration: ${{ fromJson(needs.setup.outputs.integrations) }}
+    uses: ./.github/workflows/release-with-jec.yml
+    with:
+      integration: ${{ matrix.integration }}
+      jec-version: ${{ github.event.inputs.jec-version }}
+  update-versions:
+    name: Update versions
+    runs-on: ubuntu-latest
+    needs: [ setup ]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout the repository with branch
+        uses: actions/checkout@v4
+      - name: Set branch name to env
+        id: prepare-branch-name
+        run: |
+          branchName=release-all-jec-$(date +%s)
+          echo branchName:$branchName
+          echo ::set-output name=BRANCH_NAME::$(echo $branchName)
+      - name: Commit and push changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ steps.prepare-branch-name.outputs.branch_name }}
+        run: |
+          BRANCH_NAME=${{ env.BRANCH_NAME }}
+          version_file="release/jec-builder/version.json"
+
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'support@atlassian.com'
+          git checkout "$BRANCH_NAME" 2>/dev/null || git checkout -b "$BRANCH_NAME"
+
+          pr_body=$'Update all jec integrations\' versions\n'
+
+          inc_ver() {
+            local INTEGRATION_NAME=$1
+            current_version=$(jq -r --arg integration "$INTEGRATION_NAME" '.[$integration]' "$version_file")
+            new_version=$(echo "$current_version" | awk -F. -v OFS=. '{$3++;print}')
+            echo "Updating $INTEGRATION_NAME version from $current_version to $new_version in $version_file"
+            jq --arg new_version "$new_version" --arg integration "$INTEGRATION_NAME" '.[$integration] = $new_version' "$version_file" >temp.json && mv temp.json "$version_file"
+            pr_body+=$'\n- Update '$INTEGRATION_NAME$' version from '$current_version$' to '$new_version
+          }
+
+          while read -r key; do
+            inc_ver "$key"
+          done < <(jq 'del(.jecVersion)' "$version_file" | jq -r 'keys' | jq -r '.[]')
+
+          git commit -am "Update version file after release(s)"
+          git push origin "$BRANCH_NAME"
+          gh pr create --title "Update all jec integrations' versions" \
+            --body "$pr_body" \
+            --base master \
+            --head $BRANCH_NAME \
+            --reviewer ${{ github.actor }}
