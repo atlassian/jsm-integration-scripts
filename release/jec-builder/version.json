@@ -1,7 +1,7 @@
 {
   "jecVersion": "1.0.1",
   "icinga": "1.0.1",
-  "icinga2": "1.0.1",
+  "icinga2": "1.0.2",
   "jec": "1.0.1",
   "nagios": "1.0.1",
   "nagios-xi": "1.0.1",
