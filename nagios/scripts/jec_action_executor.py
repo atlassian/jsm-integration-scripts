@@ -64,7 +64,14 @@ def parse_from_details(key):
 
 def get_url(conf_property, backward_compatibility_url):
     url = parse_field(conf_property, True)
-    if url:
+    if nagios_server and "default" != nagios_server:
+            scheme = parse_field("scheme", False)
+            if scheme is None and "http" not in nagios_server:
+                scheme = "http"
+            url = urllib.parse.urlunparse(
+                (scheme, nagios_server, urllib.parse.quote(backward_compatibility_url), None, None, None))
+            return url
+    elif url:
         return url
     else:
         # backward compatibility
@@ -105,9 +112,9 @@ def get_image(url, entity):
     else:
         content = response.content
         logging.warning("Could not get image from url " + url + ".ResponseCode: " + str(
-            response.status_code) + "Reason: " + content)
+            response.status_code) + "Reason: " + str(content))
         print("Could not get image from url " + url + ".ResponseCode: " + str(
-            response.status_code) + "Reason: " + content)
+            response.status_code) + "Reason: " + str(content))
         return None
 
 

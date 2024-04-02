@@ -47,8 +47,6 @@ func main() {
 		panic(err)
 	}
 
-	logger = configureLogger()
-
 	errFromConf := readConfigurationFileFromJECConfig(configPath2)
 
 	if errFromConf != nil {
@@ -57,6 +55,8 @@ func main() {
 
 	version := flag.String("v", "", "")
 	parseFlags()
+
+	logger = configureLogger()
 
 	printConfigToLog()
 
@@ -302,14 +302,14 @@ func parseFlags() map[string]string {
 
 	flag.Parse()
 
-	parameters["triggerName"] = removeSpecialCharacters(*triggerName)
+	parameters["triggerName"] = *triggerName
 	parameters["triggerId"] = removeSpecialCharacters(*triggerId)
 	parameters["triggerStatus"] = removeSpecialCharacters(*triggerStatus)
 	parameters["triggerSeverity"] = removeSpecialCharacters(*triggerSeverity)
-	parameters["triggerDescription"] = removeSpecialCharacters(*triggerDescription)
+	parameters["triggerDescription"] = *triggerDescription
 	parameters["triggerUrl"] = *triggerUrl
 	parameters["triggerValue"] = removeSpecialCharacters(*triggerValue)
-	parameters["triggerHostGroupName"] = removeSpecialCharacters(*triggerHostGroupName)
+	parameters["triggerHostGroupName"] = *triggerHostGroupName
 	parameters["hostName"] = *hostName
 	parameters["ipAddress"] = *ipAddress
 	parameters["date"] = *date
