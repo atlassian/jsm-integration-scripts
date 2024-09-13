@@ -10,7 +10,7 @@
   "solarwinds-msp-n-central": "1.0.2",
   "solarwinds-npm": "1.0.2",
   "solarwinds-web-help-desk": "1.0.2",
-  "zenoss": "1.0.2",
+  "zenoss": "1.0.3",
   "zabbix": "1.0.3",
   "bmc-footprints-v11": "1.0.2",
   "bmc-footprints-v12": "1.0.2",
