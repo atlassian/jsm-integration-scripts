@@ -26,6 +26,7 @@ on:
           - jira-service-management
           - jira-software
           - trackit
+          - librenms
       jec-version:
         description: 'Version of JEC'
         required: true
