@@ -31,6 +31,7 @@
 > * jira-service-management
 > * jira-software
 > * trackit
+> * librenms
 > * graylog-plugin
 > * logstash-output-plugin
 

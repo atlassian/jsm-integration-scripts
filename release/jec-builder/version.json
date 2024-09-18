@@ -18,5 +18,6 @@
   "cherwell": "1.0.2",
   "jira-service-management": "1.0.4",
   "jira-software": "1.0.3",
-  "trackit": "1.0.2"
+  "trackit": "1.0.2",
+  "librenms": "1.0.0"
 }
