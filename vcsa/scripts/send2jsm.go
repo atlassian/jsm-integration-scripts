@@ -24,7 +24,7 @@ var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
 var configParameters = map[string]string{"apiKey": API_KEY,
-	"jsm.api.url":                  "https://api.atlassian.com/jsm/ops/integration",
+	"jsm.api.url":                  "https://api.atlassian.com",
 	"vcsa2jsm.logger":              "warning",
 	"vcsa2jsm.http.proxy.enabled":  "false",
 	"vcsa2jsm.http.proxy.port":     "1111",
