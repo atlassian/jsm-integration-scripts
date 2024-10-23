@@ -25,10 +25,10 @@ import (
 
 var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": "",
-	"bmcFootPrints.url":                          "",
-	"bmcFootPrints.username":                     "",
-	"bmcFootPrints.password":                     "",
-	"bmcFootPrints.workspaceName":                "",
+	"bmcFootPrints.url":                     "",
+	"bmcFootPrints.username":                "",
+	"bmcFootPrints.password":                "",
+	"bmcFootPrints.workspaceName":           "",
 	"bmcFootPrints2jsm.logger":              "warning",
 	"jsm.api.url":                           "https://api.jsm.com",
 	"bmcFootPrints2jsm.http.proxy.enabled":  "false",

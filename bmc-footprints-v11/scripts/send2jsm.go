@@ -24,9 +24,9 @@ import (
 
 var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": "",
-	"bmcFootPrints.url":                          "",
-	"bmcFootPrints.username":                     "",
-	"bmcFootPrints.password":                     "",
+	"bmcFootPrints.url":                     "",
+	"bmcFootPrints.username":                "",
+	"bmcFootPrints.password":                "",
 	"bmcFootPrints2jsm.logger":              "warning",
 	"jsm.api.url":                           "https://api.atlassian.com",
 	"bmcFootPrints2jsm.http.proxy.enabled":  "false",
@@ -104,7 +104,7 @@ type IssueDetailsResult struct {
 	LastDateServer      string `xml:"lastdateServer"`
 	LastTimeServer      string `xml:"lasttimeServer"`
 	MostRecentEdit      MostRecentEdit
-	JSMAlertAlias  string `xml:"JSM__bAlert__bAlias"`
+	JSMAlertAlias       string `xml:"JSM__bAlert__bAlias"`
 }
 
 func main() {

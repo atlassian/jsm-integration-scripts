@@ -20,8 +20,8 @@ import (
 
 var TOTAL_TIME = 60
 var configParameters = map[string]string{
-	"logLevel": "warning",
-	"logPath":  "/var/log/jsm/nagios2jsm.log",
+	"logLevel":  "warning",
+	"logPath":   "/var/log/jsm/nagios2jsm.log",
 	"jsmApiUrl": "https://api.atlassian.com/jsm/ops/integration",
 }
 var parameters = make(map[string]string)

@@ -78,7 +78,7 @@ func main() {
 
 func printConfigToLog() {
 	if logger != nil {
-		if (logger.LogDebug()) {
+		if logger.LogDebug() {
 			logger.Debug("Config:")
 			for k, v := range configParameters {
 				if strings.Contains(k, "password") {
@@ -116,7 +116,7 @@ func readConfigFile(file io.Reader) {
 		panic(err)
 	}
 }
-func readConfigurationFileFromJECConfig(filepath string) (error) {
+func readConfigurationFileFromJECConfig(filepath string) error {
 
 	jsonFile, err := os.Open(filepath)
 
@@ -466,7 +466,7 @@ func parseFlags() map[string]string {
 
 	args := flag.Args()
 	for i := 0; i < len(args); i += 2 {
-		if (len(args)%2 != 0 && i == len(args)-1) {
+		if len(args)%2 != 0 && i == len(args)-1 {
 			parameters[args[i]] = ""
 		} else {
 			parameters[args[i]] = args[i+1]
