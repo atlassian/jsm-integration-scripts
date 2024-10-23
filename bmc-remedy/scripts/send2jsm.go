@@ -24,7 +24,7 @@ import (
 var API_KEY string = ""
 var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": API_KEY,
-	"jsm.api.url":                       "https://api.atlassian.com/jsm/ops/integration",
+	"jsm.api.url":                       "https://api.atlassian.com",
 	"bmcRemedy2jsm.logger":              "warning",
 	"bmcRemedy2jsm.http.proxy.enabled":  "false",
 	"bmcRemedy2jsm.http.proxy.port":     "1111",

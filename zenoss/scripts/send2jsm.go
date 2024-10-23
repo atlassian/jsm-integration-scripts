@@ -1,33 +1,33 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"flag"
-	"net/http"
-	"net"
-	"time"
-	"os"
-	"bufio"
-	"strings"
-	"io"
-	"strconv"
-	"github.com/alexcesaro/log/golog"
-	"github.com/alexcesaro/log"
 	"fmt"
+	"github.com/alexcesaro/log"
+	"github.com/alexcesaro/log/golog"
+	"io"
 	"io/ioutil"
-	"crypto/tls"
+	"net"
+	"net/http"
 	"net/url"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": API_KEY,
-	"zenoss2jsm.logger": "warning",
-	"jsm.api.url": "https://api.atlassian.com",
-	"zenoss2jsm.http.proxy.enabled": "false",
-	"zenoss2jsm.http.proxy.port": "1111",
-	"zenoss2jsm.http.proxy.host": "localhost",
+	"zenoss2jsm.logger":              "warning",
+	"jsm.api.url":                    "https://api.atlassian.com",
+	"zenoss2jsm.http.proxy.enabled":  "false",
+	"zenoss2jsm.http.proxy.port":     "1111",
+	"zenoss2jsm.http.proxy.host":     "localhost",
 	"zenoss2jsm.http.proxy.protocol": "http",
 	"zenoss2jsm.http.proxy.username": "",
 	"zenoss2jsm.http.proxy.password": ""}
@@ -55,7 +55,7 @@ func main() {
 	if parameters["test"] == true {
 		logger.Warning("Sending test alert to JSM.")
 	} else {
-		if (strings.ToLower(eventState) == "close") {
+		if strings.ToLower(eventState) == "close" {
 			if logger != nil {
 				logger.Info("eventState flag is set to close. Will not try to retrieve event details from zenoss")
 			}
@@ -68,7 +68,7 @@ func main() {
 
 func printConfigToLog() {
 	if logger != nil {
-		if (logger.LogDebug()) {
+		if logger.LogDebug() {
 			logger.Debug("Config:")
 			for k, v := range configParameters {
 				if strings.Contains(k, "password") {
@@ -101,7 +101,7 @@ func readConfigFile(file io.Reader) {
 		panic(err)
 	}
 }
-func readConfigurationFileFromJECConfig(filepath string) (error) {
+func readConfigurationFileFromJECConfig(filepath string) error {
 
 	jsonFile, err := os.Open(filepath)
 
@@ -135,6 +135,7 @@ type Configuration struct {
 	ApiKey  string `json:"apiKey"`
 	BaseUrl string `json:"baseUrl"`
 }
+
 func configureLogger() log.Logger {
 	level := configParameters["zenoss2jsm.logger"]
 	var logFilePath = parameters["logPath"].(string)
@@ -341,7 +342,7 @@ func parseFlags() {
 
 	args := flag.Args()
 	for i := 0; i < len(args); i += 2 {
-		if (len(args)%2 != 0 && i == len(args)-1) {
+		if len(args)%2 != 0 && i == len(args)-1 {
 			parameters[args[i]] = ""
 		} else {
 			parameters[args[i]] = args[i+1]
@@ -378,13 +379,13 @@ func parseFlags() {
 	if *responders != "" {
 		parameters["responders"] = *responders
 	} else {
-		parameters["responders"] = configParameters ["responders"]
+		parameters["responders"] = configParameters["responders"]
 	}
 
 	if *tags != "" {
 		parameters["tags"] = *tags
 	} else {
-		parameters["tags"] = configParameters ["tags"]
+		parameters["tags"] = configParameters["tags"]
 	}
 
 	if *logPath != "" {

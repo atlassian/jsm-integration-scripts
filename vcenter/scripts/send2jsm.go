@@ -1,35 +1,35 @@
 package main
 
 import (
-	"os"
-	"strings"
-	"encoding/json"
-	"net/http"
-	"bytes"
-	"github.com/alexcesaro/log/golog"
-	"github.com/alexcesaro/log"
-	"flag"
-	"io"
 	"bufio"
-	"strconv"
+	"bytes"
 	"crypto/tls"
-	"net"
-	"time"
-	"io/ioutil"
+	"encoding/json"
+	"flag"
 	"fmt"
+	"github.com/alexcesaro/log"
+	"github.com/alexcesaro/log/golog"
+	"io"
+	"io/ioutil"
+	"net"
+	"net/http"
 	"net/url"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
 var configParameters = map[string]string{"apiKey": API_KEY,
-	"jsm.api.url" : "https://api.atlassian.com/jsm/ops/integration",
-	"vcenter2jsm.logger":"warning",
-	"vcenter2jsm.http.proxy.enabled" : "false",
-	"vcenter2jsm.http.proxy.port" : "1111",
-	"vcenter2jsm.http.proxy.host": "localhost",
-	"vcenter2jsm.http.proxy.protocol":"http",
+	"jsm.api.url":                     "https://api.atlassian.com",
+	"vcenter2jsm.logger":              "warning",
+	"vcenter2jsm.http.proxy.enabled":  "false",
+	"vcenter2jsm.http.proxy.port":     "1111",
+	"vcenter2jsm.http.proxy.host":     "localhost",
+	"vcenter2jsm.http.proxy.protocol": "http",
 	"vcenter2jsm.http.proxy.username": "",
 	"vcenter2jsm.http.proxy.password": ""}
 var configPath = "C:/jsm/jsm-integration/conf/integration.conf"
@@ -38,16 +38,16 @@ var logger log.Logger
 
 func main() {
 	configFile, err := os.Open(configPath)
-	if err == nil{
+	if err == nil {
 		readConfigFile(configFile)
-	}else{
+	} else {
 		panic(err)
 	}
 
-	version := flag.String("v","","")
+	version := flag.String("v", "", "")
 	parseFlags()
 
-	if *version != ""{
+	if *version != "" {
 		fmt.Println("Version: 1.1")
 		return
 	}
@@ -59,9 +59,9 @@ func main() {
 	http_post()
 }
 
-func printConfigToLog(){
+func printConfigToLog() {
 	if logger != nil {
-		if (logger.LogDebug()) {
+		if logger.LogDebug() {
 			logger.Debug("Config:")
 			for k, v := range configParameters {
 				if strings.Contains(k, "password") {
@@ -74,19 +74,19 @@ func printConfigToLog(){
 	}
 }
 
-func readConfigFile(file io.Reader){
+func readConfigFile(file io.Reader) {
 	scanner := bufio.NewScanner(file)
-	for scanner.Scan(){
+	for scanner.Scan() {
 		line := scanner.Text()
 
 		line = strings.TrimSpace(line)
-		if !strings.HasPrefix(line,"#") && line != "" {
-			l := strings.SplitN(line,"=",2)
+		if !strings.HasPrefix(line, "#") && line != "" {
+			l := strings.SplitN(line, "=", 2)
 			l[0] = strings.TrimSpace(l[0])
 			l[1] = strings.TrimSpace(l[1])
 			configParameters[l[0]] = l[1]
-			if l[0] == "timeout"{
-				TOTAL_TIME,_ = strconv.Atoi(l[1])
+			if l[0] == "timeout" {
+				TOTAL_TIME, _ = strconv.Atoi(l[1])
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func readConfigFile(file io.Reader){
 	}
 }
 
-func configureLogger ()log.Logger{
+func configureLogger() log.Logger {
 	level := configParameters["vcenter2jsm.logger"]
 	var logFilePath = parameters["logPath"]
 
@@ -108,9 +108,9 @@ func configureLogger ()log.Logger{
 	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	if err != nil {
-		fmt.Println("Could not create log file \"" + logFilePath + "\", will log to \"C:/Windows/Temp/vcenter2jsm.log\" file. Error: ", err)
+		fmt.Println("Could not create log file \""+logFilePath+"\", will log to \"C:/Windows/Temp/vcenter2jsm.log\" file. Error: ", err)
 
-		fileTmp, errTmp := os.OpenFile("C:/Windows/Temp/vcenter2jsm.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
+		fileTmp, errTmp := os.OpenFile("C:/Windows/Temp/vcenter2jsm.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 		if errTmp != nil {
 			fmt.Println("Logging disabled. Reason: ", errTmp)
@@ -123,7 +123,7 @@ func configureLogger ()log.Logger{
 
 	return tmpLogger
 }
-func getHttpClient (timeout int) *http.Client {
+func getHttpClient(timeout int) *http.Client {
 	seconds := (TOTAL_TIME / 12) * 2 * timeout
 	var proxyEnabled = configParameters["vcenter2jsm.http.proxy.enabled"]
 	var proxyHost = configParameters["vcenter2jsm.http.proxy.host"]
@@ -134,13 +134,12 @@ func getHttpClient (timeout int) *http.Client {
 
 	proxy := http.ProxyFromEnvironment
 
-
 	if proxyEnabled == "true" {
 
 		u := new(url.URL)
-		u.Host =  proxyHost + ":" + proxyPort
+		u.Host = proxyHost + ":" + proxyPort
 		if len(proxyUsername) > 0 {
-			u.User = url.UserPassword(proxyUsername,proxyPassword)
+			u.User = url.UserPassword(proxyUsername, proxyPassword)
 		}
 		u.Scheme = scheme
 
@@ -152,10 +151,10 @@ func getHttpClient (timeout int) *http.Client {
 	}
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
-			Proxy: proxy,
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			Proxy:           proxy,
 			Dial: func(netw, addr string) (net.Conn, error) {
-				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
+				conn, err := net.DialTimeout(netw, addr, time.Second*time.Duration(seconds))
 				if err != nil {
 					if logger != nil {
 						logger.Error("Error occurred while connecting: ", err)
@@ -170,7 +169,7 @@ func getHttpClient (timeout int) *http.Client {
 	return client
 }
 
-func http_post()  {
+func http_post() {
 	parameters["apiKey"] = configParameters["apiKey"]
 
 	var logPrefix = "[VCenter2JiraServiceManagement] "
@@ -179,10 +178,10 @@ func http_post()  {
 	viaMaridUrl := configParameters["viaMaridUrl"]
 	target := ""
 
-	if viaMaridUrl != ""{
+	if viaMaridUrl != "" {
 		apiUrl = viaMaridUrl
 		target = "Marid"
-	}else{
+	} else {
 		target = "JSM"
 	}
 
@@ -209,7 +208,7 @@ func http_post()  {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Debug(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+			logger.Debug(logPrefix+"Trying to send data to "+target+" with timeout: ", (TOTAL_TIME/12)*2*i)
 		}
 
 		resp, error := client.Do(request)
@@ -218,54 +217,55 @@ func http_post()  {
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
 
-			if err == nil{
-				if resp.StatusCode == 200{
+			if err == nil {
+				if resp.StatusCode == 200 {
 					if logger != nil {
 						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode))
 						logger.Debug(logPrefix + "Response: " + string(body[:]))
-						logger.Info(logPrefix +  "Data from vCenter posted to " + target + " successfully")					}
-				}else{
+						logger.Info(logPrefix + "Data from vCenter posted to " + target + " successfully")
+					}
+				} else {
 					if logger != nil {
 						logger.Error(logPrefix + "Couldn't post data from vCenter to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 					}
 				}
-			}else{
+			} else {
 				if logger != nil {
-					logger.Error(logPrefix + "Couldn't read the response from " + target, err)
+					logger.Error(logPrefix+"Couldn't read the response from "+target, err)
 				}
 			}
 			break
-		}else if i < 3 {
+		} else if i < 3 {
 			if logger != nil {
-				logger.Error(logPrefix + "Error occurred while sending data, will retry.", error)
+				logger.Error(logPrefix+"Error occurred while sending data, will retry.", error)
 			}
-		}else {
+		} else {
 			if logger != nil {
-				logger.Error(logPrefix + "Failed to post data from vCenter. ", error)
+				logger.Error(logPrefix+"Failed to post data from vCenter. ", error)
 			}
 		}
-		if resp != nil{
+		if resp != nil {
 			defer resp.Body.Close()
 		}
 	}
 }
 
-func parseFlags()map[string]string{
-	apiKey := flag.String("apiKey","","apiKey")
-	tags := flag.String ("tags","","tags")
+func parseFlags() map[string]string {
+	apiKey := flag.String("apiKey", "", "apiKey")
+	tags := flag.String("tags", "", "tags")
 	responders := flag.String("responders", "", "responders")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
 	flag.Parse()
 
-	if *apiKey != ""{
+	if *apiKey != "" {
 		configParameters["apiKey"] = *apiKey
 	}
 
-	if *tags != ""{
+	if *tags != "" {
 		parameters["tags"] = *tags
-	}else{
-		parameters["tags"] = configParameters ["tags"]
+	} else {
+		parameters["tags"] = configParameters["tags"]
 	}
 
 	if *responders != "" {
@@ -281,7 +281,7 @@ func parseFlags()map[string]string{
 	}
 	args := flag.Args()
 	for i := 0; i < len(args); i += 2 {
-		if(len(args)%2 != 0 && i==len(args)-1){
+		if len(args)%2 != 0 && i == len(args)-1 {
 			parameters[args[i]] = ""
 		} else {
 			parameters[args[i]] = args[i+1]
@@ -301,9 +301,8 @@ func parseFlags()map[string]string{
 	}
 
 	for key, value := range envVars {
-		parameters[key] = value;
+		parameters[key] = value
 	}
-
 
 	return parameters
 }
