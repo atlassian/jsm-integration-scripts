@@ -14,7 +14,8 @@ parser.add_argument('-logLevel', '--logLevel', help='Log Level', required=True)
 parser.add_argument('-username', '--username', help='Username', required=False)
 parser.add_argument('-password', '--password', help='Password', required=False)
 parser.add_argument('-url', '--url', help='Url', required=False)
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 logging.basicConfig(stream=sys.stdout, level=args['logLevel'])
 

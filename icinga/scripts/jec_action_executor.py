@@ -29,7 +29,8 @@ parser.add_argument('-scheme', '--scheme', help='Icinga scheme', required=False)
 parser.add_argument('-expire_acknowledgement_after', '-expire_acknowledgement_after',
                     help='Removes acknowledgement after given value (in minutes.)', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 queue_message_string = args['queuePayload']
 queue_message = json.loads(queue_message_string)

@@ -16,7 +16,8 @@ parser.add_argument('-password', '--password', help='Password', required=False)
 parser.add_argument('-midtierServerUrl', '--midtierServerUrl', help='MidTier Server Url', required=False)
 parser.add_argument('-serverName', '--serverName', help='Server name', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 queue_message_string = args['payload']
 queue_message = json.loads(queue_message_string)

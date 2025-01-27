@@ -14,7 +14,8 @@ parser.add_argument('-serverUrl', '--serverUrl', help='Solarwinds Server URL', r
 parser.add_argument('-apiToken', '--apiToken', help='Api Token', required=True)
 parser.add_argument('-httpTimeout', '--httpTimeout', help='Timeout for http requests', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 queue_message_string = args['queuePayload']
 queue_message = json.loads(queue_message_string)
