@@ -15,7 +15,8 @@ parser.add_argument('-passhash', '--passhash', help='Passhash', required=False)
 parser.add_argument('-prtgUrl', '--prtgUrl', help='PRTG Url', required=False)
 parser.add_argument('-sensorId', '--sensorId', help='Sensor Id', required=False)
 parser.add_argument('-acknowledgeMessage', '--acknowledgeMessage', help='Acknowledge Message', required=False)
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 logging.basicConfig(stream=sys.stdout, level=args['logLevel'])
 

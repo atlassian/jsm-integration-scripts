@@ -13,7 +13,8 @@ parser.add_argument('-url', '--url', required=False)
 parser.add_argument('-headers', '--headers', type=json.loads, required=False)
 parser.add_argument('-params', '--params', type=json.loads, required=False)
 parser.add_argument('-body', '--body', required=False)
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 raw_message = args['queuePayload']
 raw_message = raw_message.strip()

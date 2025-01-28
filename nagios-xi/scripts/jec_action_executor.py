@@ -29,7 +29,8 @@ parser.add_argument('-scheme', '--scheme', help='Scheme', required=False)
 parser.add_argument('-port', '--port', help='Port', required=False)
 parser.add_argument('-host', '--host', help='Host', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 logging.basicConfig(stream=sys.stdout, level=args['logLevel'])
 

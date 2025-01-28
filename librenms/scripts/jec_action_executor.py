@@ -14,7 +14,8 @@ parser.add_argument('-url', '--url', help='LibreNms Server Url', required=False)
 parser.add_argument('-apiToken', '--apiToken', help='Api Token', required=False)
 parser.add_argument('-timeout', '--timeout', help='Timeout', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 logging.basicConfig(stream=sys.stdout, level=args['logLevel'])
 

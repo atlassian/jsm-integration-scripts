@@ -17,7 +17,8 @@ parser.add_argument('-password', '--password', help='Password', required=False)
 parser.add_argument('-incidentWorkspaceId', '--incidentWorkspaceId', help='Incident Workspace ID', required=False)
 parser.add_argument('-problemWorkspaceId', '--problemWorkspaceId', help='Problem Workspace ID', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 queue_message_string = args['queuePayload']
 queue_message = json.loads(queue_message_string)

@@ -25,7 +25,8 @@ parser.add_argument('-expire_acknowledgement_after', '-expire_acknowledgement_af
                     help='Removes acknowledgement after given value (in minutes.)', required=False)
 parser.add_argument('-insecure', '--insecure', help='Skip verifying SSL certificate', required=False)
 
-args = vars(parser.parse_args())
+args, unknown = parser.parse_known_args()
+args = vars(args)
 
 queue_message_string = args['queuePayload']
 queue_message = json.loads(queue_message_string)
