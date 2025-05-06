@@ -68,13 +68,12 @@ def buildDebForOpsviewV6(String sourceDir, String name, String descrpt, Map file
     def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
 
     def controlTarget = "${project.buildDir}/deb/control"
-    def debVersion = version.toString().replace("-", ".")
 
     copy {
         from "${project.projectDir}/opsview/native/control_deb"
         filter {
             it.replace('[description]', "'Jsm client files'")
-                    .replace('[version]', debVersion)
+                    .replace('[version]', packageVersion)
                     .replace('[package-name]', "jsm-opsview")
         }
         into controlDir
