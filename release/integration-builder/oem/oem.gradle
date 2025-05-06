@@ -85,7 +85,6 @@ def buildDebForOEM(String sourceDir, String name, String descrpt, Map fileMappin
     def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
 
     def controlTarget = "${project.buildDir}/deb/control"
-    def debVersion = version.toString().replace("-", ".")
 
     //CONTROL
     copy {
@@ -98,7 +97,7 @@ def buildDebForOEM(String sourceDir, String name, String descrpt, Map fileMappin
         from "${project.projectDir}/oem/native/control_deb"
         filter {
             it.replace('[description]', "'jsm client files'")
-                    .replace('[version]', debVersion)
+                    .replace('[version]', packageVersion)
                     .replace('[package-name]', "jsm-oem")
         }
         into controlDir
