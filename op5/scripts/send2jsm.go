@@ -54,9 +54,9 @@ func main() {
 	version := flag.String("v", "", "")
 	parseFlags()
 
-        logger = configureLogger()
+	logger = configureLogger()
 
-        printConfigToLog()
+	printConfigToLog()
 
 	if *version != "" {
 		fmt.Println("JSM - OP5 1.0")
@@ -127,10 +127,9 @@ func readConfigurationFileFromJECConfig(filepath string) error {
 		return err
 	}
 
-        if data.LogPath != "" {
-                configParameters["logPath"] = data.LogPath
-        }
-
+	if data.LogPath != "" {
+		configParameters["logPath"] = data.LogPath
+	}
 	if configParameters["apiKey"] == "" {
 		configParameters["apiKey"] = data.ApiKey
 	}
@@ -146,7 +145,7 @@ func readConfigurationFileFromJECConfig(filepath string) error {
 type Configuration struct {
 	ApiKey  string `json:"apiKey"`
 	BaseUrl string `json:"baseUrl"`
-        LogPath string `json:"logPath"`
+	LogPath string `json:"logPath"`
 }
 
 func configureLogger() log.Logger {
