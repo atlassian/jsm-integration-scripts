@@ -44,7 +44,6 @@ func main() {
 	} else {
 		panic(err)
 	}
-	logger = configureLogger()
 
 	errFromConf := readConfigurationFileFromJECConfig(configPath2)
 
@@ -55,7 +54,9 @@ func main() {
 	version := flag.String("v", "", "")
 	parseFlags()
 
-	printConfigToLog()
+        logger = configureLogger()
+
+        printConfigToLog()
 
 	if *version != "" {
 		fmt.Println("JSM - OP5 1.0")
@@ -126,6 +127,10 @@ func readConfigurationFileFromJECConfig(filepath string) error {
 		return err
 	}
 
+        if data.LogPath != "" {
+                configParameters["logPath"] = data.LogPath
+        }
+
 	if configParameters["apiKey"] == "" {
 		configParameters["apiKey"] = data.ApiKey
 	}
@@ -141,15 +146,12 @@ func readConfigurationFileFromJECConfig(filepath string) error {
 type Configuration struct {
 	ApiKey  string `json:"apiKey"`
 	BaseUrl string `json:"baseUrl"`
+        LogPath string `json:"logPath"`
 }
 
 func configureLogger() log.Logger {
 	level := configParameters["nagios2jsm.logger"]
 	var logFilePath = parameters["logPath"]
-
-	if len(logFilePath) == 0 {
-		logFilePath = "/var/log/jec/send2jsm.log"
-	}
 
 	var tmpLogger log.Logger
 
