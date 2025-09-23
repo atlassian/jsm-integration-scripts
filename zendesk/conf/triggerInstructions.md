@@ -44,7 +44,8 @@
     "status": "{{ticket.status}}",
     "latest_comment": "{{ticket.latest_comment_html}}",
     "tags": "{{ticket.tags}}",
-    "external_id": "{{ticket.external_id}}"
+    "external_id": "{{ticket.external_id}}",
+    "current_user_name": "{{current_user.name}}"
 }
 ```
 
@@ -64,6 +65,7 @@
     "status": "{{ticket.status}}",
     "latest_comment": "{{ticket.latest_comment_html}}",
     "tags": "{{ticket.tags}}",
-    "external_id": "{{ticket.external_id}}"
+    "external_id": "{{ticket.external_id}}",
+    "current_user_name": "{{current_user.name}}"
 }
 ```
